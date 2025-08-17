@@ -17,6 +17,51 @@ int Barracks_GetListIndex(){
     return (gShopState->head_loc) + (Barracks_GetLineOffset());
 }
 
+// Barrack Unit information (TODO: Make this read from class tables instead of hardcoding our own values).
+typedef struct {
+	const char *name;
+	int classId;
+	int price;
+	int standingMapSprite;
+	int weapon[2];
+	int startStats[8];
+} barrackUnitDef;
+
+static barrackUnitDef barrackUnits[6][4] = {
+    // ITYPE_SWORD
+    {
+        {"Mymidom",   CLASS_MYRMIDON,   2500, 0x0E, {ITYPE_SWORD, -1}, {19, 3, 6, 7, 3, 2, 2, 5}},
+        {"Mercenary", CLASS_MERCENARY,  3000, 0x0A, {ITYPE_SWORD, -1}, {20, 4, 6, 6, 3, 3, 1, 5}},
+        {"Cavalier",  CLASS_CAVALIER,   3000, 0x04, {ITYPE_SWORD, ITYPE_LANCE}, {21, 5, 5, 5, 3, 5, 1, 7}},
+    },
+    // ITYPE_LANCE
+    {
+        {"Knight",      CLASS_ARMOR_KNIGHT,   2500, 0x06, {ITYPE_LANCE, -1}, {22, 7, 2, 1, 3, 8, 1, 4}},
+        {"Wyvern Rider",CLASS_WYVERN_RIDER,   3500, 0x19, {ITYPE_LANCE, -1}, {21, 6, 4, 5, 3, 6, 0, 0}},
+        {"Pegasus Kn.", CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE, -1}, {19, 3, 7, 7, 3, 1, 3, 7}},
+        {"Soldier",     CLASS_SOLDIER,        2500, 0x3F, {ITYPE_LANCE, -1}, {18, 4, 7, 7, 3, 3, 0, 5}},
+    },
+    // ITYPE_AXE
+    {
+        {"Fighter", CLASS_FIGHTER, 2500, 0x31, {ITYPE_AXE, -1}, {22, 7, 5, 4, 3, 1, 0, 5}},
+        {"Brigand", CLASS_BRIGAND, 2500, 0x33, {ITYPE_AXE, -1}, {22, 6, 4, 6, 3, 2, 0, 5}},
+        {"Pirate",  CLASS_PIRATE,  2500, 0x34, {ITYPE_AXE, -1}, {22, 5, 7, 6, 3, 2, 0, 5}},
+    },
+    // ITYPE_LIGHT
+    {
+        {"Monk", CLASS_MONK, 2500, 0x36, {ITYPE_LIGHT, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
+    },
+    // ITYPE_ANIMA
+    {
+        {"Mage", CLASS_MAGE, 2500, 0x1E, {ITYPE_ANIMA, -1}, {18, 5, 4, 5, 0, 1, 3, 5}},
+    },
+    // ITYPE_DARK
+    {
+        {"Shaman", CLASS_SHAMAN, 3000, 0x26, {ITYPE_DARK, -1}, {20, 6, 3, 3, 0, 3, 3, 5}},
+    },
+};
+
+
 extern int unused_0203e760; // P2 flag.
 extern u8 gUnused_0203E884[10]; // Barracks Unit List.
 extern int gUnused_0859166C; // Should do barracks or not.
@@ -51,56 +96,16 @@ void Barracks_AddUnitToParty(void) {
     struct Unit* unit;
     short summonerNum, i;
 
-	// TODO: MAKE GLOBAL
-	typedef struct {
-		const char *name;
-		int classId;
-		int price;
-		int standingMapSprite;
-		int weapon[2];
-		int startStats[8];
-	} barrackUnitDef;
-
-	barrackUnitDef barrackUnits[28] =
-	{
-		{"Mymidom",       CLASS_MYRMIDON,       2500, 0x0E, {ITYPE_SWORD,  -1}, 			{19, 3, 6, 7, 3, 2, 2, 5}},
-		{"Mercenary",     CLASS_MERCENARY,      3000, 0x0A, {ITYPE_SWORD,  -1}, 			{20, 4, 6, 6, 3, 3, 1, 5}},
-		{"Cavalier",      CLASS_CAVALIER,       3000, 0x04, {ITYPE_SWORD,  ITYPE_LANCE}, 	{21, 5, 5, 5, 3, 5, 1, 7}},
-		{"Knight",        CLASS_ARMOR_KNIGHT,   2500, 0x06, {ITYPE_LANCE,  -1}, 			{22, 7, 2, 1, 3, 8, 1, 4}},
-		{"Wyvern Rider",  CLASS_WYVERN_RIDER,   3500, 0x19, {ITYPE_LANCE,  -1}, 			{21, 6, 4, 5, 3, 6, 0, 0}},
-		{"Pegasus Kn.",   CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE,  -1}, 			{19, 3, 7, 7, 3, 1, 3, 7}},
-		{"Soldier",       CLASS_SOLDIER,        2500, 0x3F, {ITYPE_LANCE,  -1},				{18, 4, 7, 7, 3, 3, 0, 5}},
-		{"Fighter",       CLASS_FIGHTER,        2500, 0x31, {ITYPE_AXE,    -1}, 			{22, 7, 5, 4, 3, 1, 0, 5}},
-		{"Brigand",       CLASS_BRIGAND,        2500, 0x33, {ITYPE_AXE,    -1}, 			{22, 6, 4, 6, 3, 2, 0, 5}},
-		{"Pirate",        CLASS_PIRATE,         2500, 0x34, {ITYPE_AXE,    -1}, 			{22, 5, 7, 6, 3, 2, 0, 5}},
-		{"Monk",          CLASS_MONK,           2500, 0x36, {ITYPE_LIGHT,  -1}, 			{19, 3, 5, 6, 3, 1, 4, 5}},
-		{"Mage",          CLASS_MAGE,           2500, 0x1E, {ITYPE_ANIMA,  -1}, 			{18, 5, 4, 5, 0, 1, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-	};
 	int index = gUnused_0203E884[0];
-	int maxHp = barrackUnits[index].startStats[0];
-	int str   = barrackUnits[index].startStats[1];
-	int skill = barrackUnits[index].startStats[2];
-	int spd   = barrackUnits[index].startStats[3];
-	int luck  = barrackUnits[index].startStats[4];
-	int def   = barrackUnits[index].startStats[5];
-	int res   = barrackUnits[index].startStats[6];
-	int move  = barrackUnits[index].startStats[7];
+	int tab = gUnused_0203E884[1];
+	int maxHp = barrackUnits[tab][index].startStats[0];
+	int str   = barrackUnits[tab][index].startStats[1];
+	int skill = barrackUnits[tab][index].startStats[2];
+	int spd   = barrackUnits[tab][index].startStats[3];
+	int luck  = barrackUnits[tab][index].startStats[4];
+	int def   = barrackUnits[tab][index].startStats[5];
+	int res   = barrackUnits[tab][index].startStats[6];
+	int move  = barrackUnits[tab][index].startStats[7];
 
 
 
@@ -119,7 +124,7 @@ void Barracks_AddUnitToParty(void) {
 		unitIndex++;
 	}
     gUnitDef1.charIndex       = unitIndex;
-    gUnitDef1.classIndex      = barrackUnits[gUnused_0203E884[0]].classId;
+    gUnitDef1.classIndex      = barrackUnits[tab][gUnused_0203E884[0]].classId;
     gUnitDef1.leaderCharIndex = CHARACTER_NONE;
     gUnitDef1.autolevel       = FALSE;
 
@@ -147,7 +152,7 @@ void Barracks_AddUnitToParty(void) {
 	//int wep_slot = 0;
 	for (i = 0; i < 2; i++)
 	{
-		int weaponType = barrackUnits[gUnused_0203E884[0]].weapon[i];
+		int weaponType = barrackUnits[tab][gUnused_0203E884[0]].weapon[i];
 		if (weaponType != -1)
 		{	
 			switch (weaponType)
@@ -194,7 +199,7 @@ void Barracks_AddUnitToParty(void) {
 	// Give units the weapon skill they can use.
 	for (i = 0; i < 2; i++)
 	{
-		int weaponType = barrackUnits[gUnused_0203E884[0]].weapon[i];
+		int weaponType = barrackUnits[tab][gUnused_0203E884[0]].weapon[i];
 		int weaponToGive = 0;
 		if (weaponType != -1)
 		{
@@ -217,49 +222,9 @@ void Barracks_AddUnitToParty(void) {
 }
 
 void Barracks_PutUnitSprite(int layer, int x, int y, struct Unit * unit, int index) {
-	// TODO: MAKE GLOBAL
-	typedef struct {
-		const char *name;
-		int classId;
-		int price;
-		int standingMapSprite;
-		int weapon[2];
-		int startStats[8];
-	} barrackUnitDef;
-
-	barrackUnitDef barrackUnits[28] =
-	{
-		{"Mymidom",       CLASS_MYRMIDON,       2500, 0x0E, {ITYPE_SWORD,  -1}, 			{19, 3, 6, 7, 3, 2, 2, 5}},
-		{"Mercenary",     CLASS_MERCENARY,      3000, 0x0A, {ITYPE_SWORD,  -1}, 			{20, 4, 6, 6, 3, 3, 1, 5}},
-		{"Cavalier",      CLASS_CAVALIER,       3000, 0x04, {ITYPE_SWORD,  ITYPE_LANCE}, 	{21, 5, 5, 5, 3, 5, 1, 7}},
-		{"Knight",        CLASS_ARMOR_KNIGHT,   2500, 0x06, {ITYPE_LANCE,  -1}, 			{22, 7, 2, 1, 3, 8, 1, 4}},
-		{"Wyvern Rider",  CLASS_WYVERN_RIDER,   3500, 0x19, {ITYPE_LANCE,  -1}, 			{21, 6, 4, 5, 3, 6, 0, 0}},
-		{"Pegasus Kn.",   CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE,  -1}, 			{19, 3, 7, 7, 3, 1, 3, 7}},
-		{"Soldier",       CLASS_SOLDIER,        2500, 0x3F, {ITYPE_LANCE,  -1},				{18, 4, 7, 7, 3, 3, 0, 5}},
-		{"Fighter",       CLASS_FIGHTER,        2500, 0x31, {ITYPE_AXE,    -1}, 			{22, 7, 5, 4, 3, 1, 0, 5}},
-		{"Brigand",       CLASS_BRIGAND,        2500, 0x33, {ITYPE_AXE,    -1}, 			{22, 6, 4, 6, 3, 2, 0, 5}},
-		{"Pirate",        CLASS_PIRATE,         2500, 0x34, {ITYPE_AXE,    -1}, 			{22, 5, 7, 6, 3, 2, 0, 5}},
-		{"Monk",          CLASS_MONK,           2500, 0x36, {ITYPE_LIGHT,  -1}, 			{19, 3, 5, 6, 3, 1, 4, 5}},
-		{"Mage",          CLASS_MAGE,           2500, 0x1E, {ITYPE_ANIMA,  -1}, 			{18, 5, 4, 5, 0, 1, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-	};
 		
-    u32 id = barrackUnits[index].standingMapSprite;
+	int tab = gUnused_0203E884[1];
+    u32 id = barrackUnits[tab][index].standingMapSprite;
     int chr = UseUnitSprite(id);
 
     if (x < -16 || x > DISPLAY_WIDTH)
@@ -289,7 +254,7 @@ void Barracks_DisplayUnits(void) {
 	{
 		return;
 	}
-    for (int i=0; i<5; i++)
+    for (int i=0; i<2; i++)
     {
         ApplyUnitSpritePalettes();
         EnablePaletteSync();
@@ -306,49 +271,9 @@ void Barracks_DisplayUnits(void) {
 
 void Barracks_DrawItemMenuLine(struct Text* text, int item, s8 isUsable, u16* mapOut) {
 	// TODO: MAKE GLOBAL
-	typedef struct {
-		const char *name;
-		int classId;
-		int price;
-		int standingMapSprite;
-		int weapon[2];
-		int startStats[8];
-	} barrackUnitDef;
-
-	barrackUnitDef barrackUnits[28] =
-	{
-		{"Mymidom",       CLASS_MYRMIDON,       2500, 0x0E, {ITYPE_SWORD,  -1}, 			{19, 3, 6, 7, 3, 2, 2, 5}},
-		{"Mercenary",     CLASS_MERCENARY,      3000, 0x0A, {ITYPE_SWORD,  -1}, 			{20, 4, 6, 6, 3, 3, 1, 5}},
-		{"Cavalier",      CLASS_CAVALIER,       3000, 0x04, {ITYPE_SWORD,  ITYPE_LANCE}, 	{21, 5, 5, 5, 3, 5, 1, 7}},
-		{"Knight",        CLASS_ARMOR_KNIGHT,   2500, 0x06, {ITYPE_LANCE,  -1}, 			{22, 7, 2, 1, 3, 8, 1, 4}},
-		{"Wyvern Rider",  CLASS_WYVERN_RIDER,   3500, 0x19, {ITYPE_LANCE,  -1}, 			{21, 6, 4, 5, 3, 6, 0, 0}},
-		{"Pegasus Kn.",   CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE,  -1}, 			{19, 3, 7, 7, 3, 1, 3, 7}},
-		{"Soldier",       CLASS_SOLDIER,        2500, 0x3F, {ITYPE_LANCE,  -1},				{18, 4, 7, 7, 3, 3, 0, 5}},
-		{"Fighter",       CLASS_FIGHTER,        2500, 0x31, {ITYPE_AXE,    -1}, 			{22, 7, 5, 4, 3, 1, 0, 5}},
-		{"Brigand",       CLASS_BRIGAND,        2500, 0x33, {ITYPE_AXE,    -1}, 			{22, 6, 4, 6, 3, 2, 0, 5}},
-		{"Pirate",        CLASS_PIRATE,         2500, 0x34, {ITYPE_AXE,    -1}, 			{22, 5, 7, 6, 3, 2, 0, 5}},
-		{"Monk",          CLASS_MONK,           2500, 0x36, {ITYPE_LIGHT,  -1}, 			{19, 3, 5, 6, 3, 1, 4, 5}},
-		{"Mage",          CLASS_MAGE,           2500, 0x1E, {ITYPE_ANIMA,  -1}, 			{18, 5, 4, 5, 0, 1, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-	};
-
+	int tab = gUnused_0203E884[1];
     Text_SetParams(text, 0, (isUsable ? TEXT_COLOR_SYSTEM_WHITE : TEXT_COLOR_SYSTEM_GRAY));
-    Text_DrawString(text, barrackUnits[item-1].name);
+    Text_DrawString(text, barrackUnits[tab][item-1].name);
 	
 	//if(unused_0203e760 >= 4)
 	{
@@ -496,6 +421,8 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 
 	if(isBarracks)
 	{
+		bool refreshTab = false;
+		
 		// Do weapon tab swapping.
 		if (gKeyStatusPtr->repeatedKeys & DPAD_RIGHT)
 		{
@@ -522,6 +449,8 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 				ShopDrawBuyItemLine(proc, i);
 			}
 		}
+		
+		
 	}
 	
 	for (int i=0; i<7; i++)
@@ -668,55 +597,16 @@ int DrawHelpBoxWeaponLabels(int item) {
 void DrawHelpBoxWeaponStats(int item) {
 	
 	// TODO: MAKE GLOBAL
-	typedef struct {
-		const char *name;
-		int classId;
-		int price;
-		int standingMapSprite;
-		int weapon[2];
-		int startStats[8];
-	} barrackUnitDef;
-
-	barrackUnitDef barrackUnits[28] =
-	{
-		{"Mymidom",       CLASS_MYRMIDON,       2500, 0x0E, {ITYPE_SWORD,  -1}, 			{19, 3, 6, 7, 3, 2, 2, 5}},
-		{"Mercenary",     CLASS_MERCENARY,      3000, 0x0A, {ITYPE_SWORD,  -1}, 			{20, 4, 6, 6, 3, 3, 1, 5}},
-		{"Cavalier",      CLASS_CAVALIER,       3000, 0x04, {ITYPE_SWORD,  ITYPE_LANCE}, 	{21, 5, 5, 5, 3, 5, 1, 7}},
-		{"Knight",        CLASS_ARMOR_KNIGHT,   2500, 0x06, {ITYPE_LANCE,  -1}, 			{22, 7, 2, 1, 3, 8, 1, 4}},
-		{"Wyvern Rider",  CLASS_WYVERN_RIDER,   3500, 0x19, {ITYPE_LANCE,  -1}, 			{21, 6, 4, 5, 3, 6, 0, 0}},
-		{"Pegasus Kn.",   CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE,  -1}, 			{19, 3, 7, 7, 3, 1, 3, 7}},
-		{"Soldier",       CLASS_SOLDIER,        2500, 0x3F, {ITYPE_LANCE,  -1},				{18, 4, 7, 7, 3, 3, 0, 5}},
-		{"Fighter",       CLASS_FIGHTER,        2500, 0x31, {ITYPE_AXE,    -1}, 			{22, 7, 5, 4, 3, 1, 0, 5}},
-		{"Brigand",       CLASS_BRIGAND,        2500, 0x33, {ITYPE_AXE,    -1}, 			{22, 6, 4, 6, 3, 2, 0, 5}},
-		{"Pirate",        CLASS_PIRATE,         2500, 0x34, {ITYPE_AXE,    -1}, 			{22, 5, 7, 6, 3, 2, 0, 5}},
-		{"Monk",          CLASS_MONK,           2500, 0x36, {ITYPE_LIGHT,  -1}, 			{19, 3, 5, 6, 3, 1, 4, 5}},
-		{"Mage",          CLASS_MAGE,           2500, 0x1E, {ITYPE_ANIMA,  -1}, 			{18, 5, 4, 5, 0, 1, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-	};
 	int index = item-1;
-	int maxHp = barrackUnits[index].startStats[0];
-	int str   = barrackUnits[index].startStats[1];
-	int skill = barrackUnits[index].startStats[2];
-	int spd   = barrackUnits[index].startStats[3];
-	int luck  = barrackUnits[index].startStats[4];
-	int def   = barrackUnits[index].startStats[5];
-	int res   = barrackUnits[index].startStats[6];
-	int move  = barrackUnits[index].startStats[7];
+	int tab = gUnused_0203E884[1];
+	int maxHp = barrackUnits[tab][index].startStats[0];
+	int str   = barrackUnits[tab][index].startStats[1];
+	int skill = barrackUnits[tab][index].startStats[2];
+	int spd   = barrackUnits[tab][index].startStats[3];
+	int luck  = barrackUnits[tab][index].startStats[4];
+	int def   = barrackUnits[tab][index].startStats[5];
+	int res   = barrackUnits[tab][index].startStats[6];
+	int move  = barrackUnits[tab][index].startStats[7];
 	
     // Recruit
     Text_InsertDrawNumberOrBlank(&gHelpBoxSt.text[0], 32 + 2, 7, maxHp); // HP
@@ -738,48 +628,6 @@ inline int GetItemCost(int item) {
 	
 	if(isBarracks)
 	{
-	// TODO: MAKE GLOBAL
-	typedef struct {
-		const char *name;
-		int classId;
-		int price;
-		int standingMapSprite;
-		int weapon[2];
-		int startStats[8];
-	} barrackUnitDef;
-
-	barrackUnitDef barrackUnits[28] =
-	{
-		{"Mymidom",       CLASS_MYRMIDON,       2500, 0x0E, {ITYPE_SWORD,  -1}, 			{19, 3, 6, 7, 3, 2, 2, 5}},
-		{"Mercenary",     CLASS_MERCENARY,      3000, 0x0A, {ITYPE_SWORD,  -1}, 			{20, 4, 6, 6, 3, 3, 1, 5}},
-		{"Cavalier",      CLASS_CAVALIER,       3000, 0x04, {ITYPE_SWORD,  ITYPE_LANCE}, 	{21, 5, 5, 5, 3, 5, 1, 7}},
-		{"Knight",        CLASS_ARMOR_KNIGHT,   2500, 0x06, {ITYPE_LANCE,  -1}, 			{22, 7, 2, 1, 3, 8, 1, 4}},
-		{"Wyvern Rider",  CLASS_WYVERN_RIDER,   3500, 0x19, {ITYPE_LANCE,  -1}, 			{21, 6, 4, 5, 3, 6, 0, 0}},
-		{"Pegasus Kn.",   CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE,  -1}, 			{19, 3, 7, 7, 3, 1, 3, 7}},
-		{"Soldier",       CLASS_SOLDIER,        2500, 0x3F, {ITYPE_LANCE,  -1},				{18, 4, 7, 7, 3, 3, 0, 5}},
-		{"Fighter",       CLASS_FIGHTER,        2500, 0x31, {ITYPE_AXE,    -1}, 			{22, 7, 5, 4, 3, 1, 0, 5}},
-		{"Brigand",       CLASS_BRIGAND,        2500, 0x33, {ITYPE_AXE,    -1}, 			{22, 6, 4, 6, 3, 2, 0, 5}},
-		{"Pirate",        CLASS_PIRATE,         2500, 0x34, {ITYPE_AXE,    -1}, 			{22, 5, 7, 6, 3, 2, 0, 5}},
-		{"Monk",          CLASS_MONK,           2500, 0x36, {ITYPE_LIGHT,  -1}, 			{19, 3, 5, 6, 3, 1, 4, 5}},
-		{"Mage",          CLASS_MAGE,           2500, 0x1E, {ITYPE_ANIMA,  -1}, 			{18, 5, 4, 5, 0, 1, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-	};
-
 		
 		// Hack, don't support more than 20 due to array size limit.
 		if(item > 20)
@@ -787,7 +635,8 @@ inline int GetItemCost(int item) {
 			return 10000;
 		}
 		
-		return barrackUnits[item-1].price/2;
+		int tab = gUnused_0203E884[1];
+		return barrackUnits[tab][item-1].price/2;
 	}
 	
     if (GetItemAttributes(item) & IA_UNBREAKABLE)
@@ -826,7 +675,7 @@ void StartShopScreen(struct Unit * unit, const u16 * inventory, u8 shopType, Pro
 	// Hardcode items 1->20 as entries. This will allow us to track each unit.
 	if(isBarracks)
 	{
-		for (i = 0; i < 20; i++)
+		for (i = 0; i < 2; i++)
 		{
 			//if (i < 14 + 999)
 			{
@@ -870,51 +719,11 @@ void DrawItemMenuLine(struct Text* text, int item, s8 isUsable, u16* mapOut) {
 		
 		Barracks_DrawItemMenuLine(text, item, true, mapOut);
 			
-	// TODO: MAKE GLOBAL
-	typedef struct {
-		const char *name;
-		int classId;
-		int price;
-		int standingMapSprite;
-		int weapon[2];
-		int startStats[8];
-	} barrackUnitDef;
 
-	barrackUnitDef barrackUnits[28] =
-	{
-		{"Mymidom",       CLASS_MYRMIDON,       2500, 0x0E, {ITYPE_SWORD,  -1}, 			{19, 3, 6, 7, 3, 2, 2, 5}},
-		{"Mercenary",     CLASS_MERCENARY,      3000, 0x0A, {ITYPE_SWORD,  -1}, 			{20, 4, 6, 6, 3, 3, 1, 5}},
-		{"Cavalier",      CLASS_CAVALIER,       3000, 0x04, {ITYPE_SWORD,  ITYPE_LANCE}, 	{21, 5, 5, 5, 3, 5, 1, 7}},
-		{"Knight",        CLASS_ARMOR_KNIGHT,   2500, 0x06, {ITYPE_LANCE,  -1}, 			{22, 7, 2, 1, 3, 8, 1, 4}},
-		{"Wyvern Rider",  CLASS_WYVERN_RIDER,   3500, 0x19, {ITYPE_LANCE,  -1}, 			{21, 6, 4, 5, 3, 6, 0, 0}},
-		{"Pegasus Kn.",   CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE,  -1}, 			{19, 3, 7, 7, 3, 1, 3, 7}},
-		{"Soldier",       CLASS_SOLDIER,        2500, 0x3F, {ITYPE_LANCE,  -1},				{18, 4, 7, 7, 3, 3, 0, 5}},
-		{"Fighter",       CLASS_FIGHTER,        2500, 0x31, {ITYPE_AXE,    -1}, 			{22, 7, 5, 4, 3, 1, 0, 5}},
-		{"Brigand",       CLASS_BRIGAND,        2500, 0x33, {ITYPE_AXE,    -1}, 			{22, 6, 4, 6, 3, 2, 0, 5}},
-		{"Pirate",        CLASS_PIRATE,         2500, 0x34, {ITYPE_AXE,    -1}, 			{22, 5, 7, 6, 3, 2, 0, 5}},
-		{"Monk",          CLASS_MONK,           2500, 0x36, {ITYPE_LIGHT,  -1}, 			{19, 3, 5, 6, 3, 1, 4, 5}},
-		{"Mage",          CLASS_MAGE,           2500, 0x1E, {ITYPE_ANIMA,  -1}, 			{18, 5, 4, 5, 0, 1, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-		{"Shaman",        CLASS_SHAMAN,         3000, 0x26, {ITYPE_DARK,   -1}, 			{20, 6, 3, 3, 0, 3, 3, 5}},
-	};
-		
+		int tab = gUnused_0203E884[1];
 		for(int i=0; i<2; i++)
 		{
-			Barracks_DrawUnitWeaponIcon(mapOut + 9 + 2 * i, barrackUnits[item-1].weapon[i], OAM2_PAL(5)); // Draw weapons unit can use.
+			Barracks_DrawUnitWeaponIcon(mapOut + 9 + 2 * i, barrackUnits[tab][item-1].weapon[i], OAM2_PAL(5)); // Draw weapons unit can use.
 		}
 		
 		/*	// If unit has no entry for other weapon to use.
