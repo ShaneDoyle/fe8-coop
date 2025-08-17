@@ -30,7 +30,7 @@ struct SysBlackBoxProc {
     /* 4E */ u16 chr;
 };
 
-extern struct ProcCmd ProcScr_SysSysBlackBox[];
+extern struct ProcCmd ProcScr_SysBlackBox[];
 
 void SysBlackBox_Init(struct SysBlackBoxProc * proc);
 void SysBlackBox_Main(struct SysBlackBoxProc * proc);
@@ -150,13 +150,14 @@ void NewSysboxText(int vobj_offset, int pal, const char * str, int line, int del
 void EndAllProcChildren(ProcPtr proc);
 void nop_80ADDF8(void);
 
-/* Some objects scalling routine */
-void sub_80ADDFC(u8 layer, s16 angle, s16, s16, s16, s16);
-void sub_80ADE90(u8, s16, s16);
-void sub_80ADEE0(u8, s16, s16, s16, s16);
-void sub_80ADF48(u8 layer, int angle, int a, int b, int c, int d);
-void sub_80ADFBC(u8 layer, int a, int b);
-void sub_80ADFFC(u8 layer, int a, int b, int c, int d);
+/* Bg-affin rot/scale */
+void BgAffinRotScaling(u8 bg, s16 angle, s16 x_center, s16 y_center, s16 sx, s16 sy);
+void BgAffinScaling(u8 bg, s16 sy, s16 sx);
+void BgAffinAnchoring(u8 bg, s16 q0_x, s16 q0_y, s16 p0_x, s16 p0_y);
+
+void BgAffinRotScalingHighPrecision(u8 bg, int angle, int texX, int texY, int sx, int sy);
+void BgAffinScalingHighPrecision(u8 bg, int sy, int sx);
+void BgAffinAnchoringHighPrecision(u8 bg, int q0_x, int q0_y, int p0_x, int p0_y);
 
 /* No idea, maybe some tile map or palette modication */
 void sub_80AE044(int a, u16 * buf, int c, int d, int e, int f, int g, int h);
@@ -197,3 +198,85 @@ void NewFadeInWhite2(int speed, ProcPtr parent);
 void NewFadeOutWhite2(int speed, ProcPtr parent);
 void WipeAllPalette(void);
 void EndFadeInOut(void);
+
+struct BmBgxConf
+{
+    /* 00 */ u8 type;
+    /* 04 */ void * data;
+    /* 08 */ u16 size;
+    /* 0A */ u8 duration;
+    /* 0B */ STRUCT_PAD(0x0b, 0x0c);
+};
+
+enum BmBgxConf_type {
+    BMFX_CONFT_IMG = 0,  /* Uncomprsssed image */ 
+    BMFX_CONFT_ZIMG = 1, /* Compresssed  image */
+    BMFX_CONFT_TSA = 2,
+    BMFX_CONFT_PAL = 3,
+    BMFX_CONFT_LOOP_START = 4,
+    BMFX_CONFT_LOOP = 5,
+    BMFX_CONFT_BLOCKING = 6,
+    BMFX_CONFT_7,
+    BMFX_CONFT_CALL_IDLE = 8,
+    BMFX_CONFT_BREAK = 9,
+    BMFX_CONFT_END = 10
+};
+
+typedef s8 bmfx_idle(ProcPtr);
+
+struct ProcBmBgfx {
+    /* 00 */ PROC_HEADER;
+    /* 2C */ struct BmBgxConf * conf;
+    /* 30 */ u16 x;
+    /* 32 */ u16 y;
+    /* 34 */ u8 bg;
+    /* 35 */ u8 pal_bank;
+    /* 36 */ s8 counter; /* counter for loop */
+    /* 37 */ u8 flip; /* 1 --> 0 --> 1 --> 0 */
+    /* 38 */ u8 timer;
+    /* 39 */ u8 func_call_type; /* 0 = idle, 1 = cmd call */
+    /* 3A */ bool loop_en;
+    /* 3B */ STRUCT_PAD(0x3b, 0x3c);
+    /* 3C */ int vram_base;
+    /* 40 */ u32 vram_base_offset;
+    /* 44 */ int vram_free_space;
+    /* 48 */ u32 size_per_fx; /* Size of each frame usage in VRAM */
+    /* 4C */ int total_duration;
+    /* 50 */ int counter_procloop;
+    /* 54 */ int counter_functioncall;
+    /* 58 */ s8 (* callback)(ProcPtr);
+};
+
+extern struct ProcCmd ProcScr_BmBgfx[];
+
+void BmBgfx_Init(struct ProcBmBgfx * proc);
+void BmBgfx_Loop(struct ProcBmBgfx * proc);
+void BmBgfx_End(struct ProcBmBgfx * proc);
+s8 CheckBmBgfxDone(void);
+void BmBgfxAdvance(void);
+void EndBmBgfx(void);
+void BmBgfxSetLoopEN(u8);
+void StartBmBgfx(struct BmBgxConf * input, int bg, int x, int y, int e, int f, int g, void * func, ProcPtr parent);
+
+struct ProcMixPalette
+{
+    /* 00 */ PROC_HEADER;
+    /* 2C */ int speed;
+    /* 30 */ int targetPalId;
+    /* 34 */ int palCount;
+    /* 38 */ int timer;
+    /* 3C */ u16 * srcA;
+    /* 40 */ u16 * srcB;
+};
+
+void MixPaletteCore(struct ProcMixPalette * proc, int val);
+void MixPalette_Init(struct ProcMixPalette * proc);
+void MixPalette_Loop(struct ProcMixPalette * proc);
+void StartMixPalette(u16 * palA, u16 * palB, int speed, int targetPalId, int palCount, ProcPtr parent);
+void EndMixPalette(void);
+
+ProcPtr StartSpriteAnimfx(const u8 * gfx, const u16 * pal, const void * apDef, int x, int y, int animId, int palId, int palCount, u16 chr, int aObjNode);
+int GetBgXOffset(int bg);
+int GetBgYOffset(int bg);
+char * AppendString(const char * src, char * dst);
+char * AppendCharacter(int character, char * str);

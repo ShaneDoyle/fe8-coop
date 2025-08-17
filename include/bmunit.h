@@ -98,12 +98,10 @@ struct ClassData
 
     /* 22 */ u8 promotionHp;
     /* 23 */ u8 promotionPow;
-	#ifndef FE6
     /* 24 */ u8 promotionSkl;
     /* 25 */ u8 promotionSpd;
     /* 26 */ u8 promotionDef;
     /* 27 */ u8 promotionRes;
-	#endif 
 
     /* 28 */ u32 attributes;
 
@@ -118,10 +116,17 @@ struct ClassData
 
     /* 50 */ const void * _pU50;
 };
+
+enum {
+    // ClassData::slowWalking
+    UNIT_WALKSPEED_FAST,
+    UNIT_WALKSPEED_SLOW,
+};
+
 struct Unit
 {
-    /* 00 */ const struct CharacterData * pCharacterData;
-    /* 04 */ const struct ClassData * pClassData;
+    /* 00 */ const struct CharacterData* pCharacterData;
+    /* 04 */ const struct ClassData* pClassData;
 
     /* 08 */ s8 level;
     /* 09 */ u8 exp;
@@ -130,11 +135,7 @@ struct Unit
 
     /* 0B */ s8 index;
 
-#ifndef FE6
     /* 0C */ u32 state;
-#else
-    u16 state;
-#endif
 
     /* 10 */ s8 xPos;
     /* 11 */ s8 yPos;
@@ -150,13 +151,9 @@ struct Unit
 
     /* 1A */ s8 conBonus;
     /* 1B */ u8 rescue;
-#ifdef FE6
-    s8 movBonus; // used
-    s8 movBonusB; // displayed on stat screen
-#else
     /* 1C */ u8 ballistaIndex;
     /* 1D */ s8 movBonus;
-#endif
+
     /* 1E */ u16 items[UNIT_ITEM_COUNT];
     /* 28 */ u8 ranks[8];
 
@@ -167,23 +164,33 @@ struct Unit
     /* 31 */ u8 barrierDuration : 4;
 
     /* 32 */ u8 supports[UNIT_SUPPORT_MAX_COUNT];
-#ifndef FE6
     /* 39 */ s8 supportBits;
-#endif
+
+    /* pad */
     /* 3A */ u8 _u3A;
     /* 3B */ u8 _u3B;
 
     /* 3C */ struct SMSHandle * pMapSpriteHandle;
 
-    /* 40 */ u16 ai3And4;
-    /* 42 */ u8 ai1;
-    /* 43 */ u8 ai1data;
-    /* 44 */ u8 ai2;
-    /* 45 */ u8 ai2data;
-    /* 46 */ u8 _u46;
+    /* 40 */ u16 ai_config; // a bitmask
+    /* 42 */ u8 ai1;        // enum to gAi1ScriptTable
+    /* 43 */ u8 ai_a_pc;
+    /* 44 */ u8 ai2;        // enum to gAi2ScriptTable
+    /* 45 */ u8 ai_b_pc;
+    /* 46 */ u8 ai_counter;
+
+    /* pad */
     /* 47 */ u8 _u47;
 };
 
+enum udef_ai_index {
+    UDEF_AIIDX_AI_A,
+    UDEF_AIIDX_AI_B,
+    UDEF_AIIDX_AI_CONF_L,
+    UDEF_AIIDX_AI_CONF_H,
+
+    UDEF_AIIDX_MAX
+};
 
 struct UnitDefinition
 {
@@ -208,7 +215,7 @@ struct UnitDefinition
 
     /* 0C */ u8 items[UNIT_DEFINITION_ITEM_COUNT];
 
-    /* 10 */ u8 ai[4];
+    /* 10 */ u8 ai[UDEF_AIIDX_MAX];
 } BITPACKED;
 
 enum
@@ -253,6 +260,7 @@ enum
 
     // Helpers
     US_UNAVAILABLE = (US_DEAD | US_NOT_DEPLOYED | US_BIT16),
+    US_SOLOANIM = (US_SOLOANIM_1 | US_SOLOANIM_2),
 };
 
 enum

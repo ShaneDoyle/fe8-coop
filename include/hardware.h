@@ -122,18 +122,8 @@ struct LCDControlBuffer {
     /* 44 */ u8 blendCoeffA;
     /* 45 */ u8 blendCoeffB;
     /* 46 */ u8 blendY;
-    /* 48 */ u16 bg2pa;
-    /* 4A */ u16 bg2pb;
-    /* 4C */ u16 bg2pc;
-    /* 4E */ u16 bg2pd;
-    /* 50 */ u32 bg2x;
-    /* 54 */ u32 bg2y;
-    /* 58 */ u16 bg3pa;
-    /* 5A */ u16 bg3pb;
-    /* 5C */ u16 bg3pc;
-    /* 5E */ u16 bg3pd;
-    /* 60 */ u32 bg3x;
-    /* 64 */ u32 bg3y;
+    /* 48 */ struct BgAffineDstData bg2affin;
+    /* 58 */ struct BgAffineDstData bg3affin;
     /* 68 */ s8 colorAddition;
 };
 
@@ -202,7 +192,6 @@ extern void (*gMainCallback)(void);
 extern struct KeyStatusBuffer * CONST_DATA gKeyStatusPtr;
 
 extern struct LCDControlBuffer gLCDControlBuffer;
-extern struct BgAffineDstData gOpAnimBgAffineDstData[2];
 
 extern struct Struct02024CD4 gFrameTmRegisterConfig;
 extern struct TileDataTransfer gFrameTmRegister[32];
@@ -336,16 +325,20 @@ enum {
 }
 
 #define SetBlendAlpha(ca, cb) \
-    SetSpecialColorEffectsParameters(BLEND_EFFECT_ALPHA, (ca), (cb), 0)
+    SetBlendConfig(BLEND_EFFECT_ALPHA, (ca), (cb), 0)
 
 #define SetBlendBrighten(cy) \
-    SetSpecialColorEffectsParameters(BLEND_EFFECT_BRIGHTEN, 0, 0, (cy))
+    SetBlendConfig(BLEND_EFFECT_BRIGHTEN, 0, 0, (cy))
 
 #define SetBlendDarken(cy) \
-    SetSpecialColorEffectsParameters(BLEND_EFFECT_DARKEN, 0, 0, (cy))
+    SetBlendConfig(BLEND_EFFECT_DARKEN, 0, 0, (cy))
 
 #define SetBlendNone() \
-    SetSpecialColorEffectsParameters(BLEND_EFFECT_NONE, 0x10, 0, 0)
+    SetBlendConfig(BLEND_EFFECT_NONE, 0x10, 0, 0)
+
+#define SetBackdropColor(color) \
+    gPaletteBuffer[0] = (color); \
+    EnablePaletteSync()
 
 // Functions
 
@@ -384,7 +377,7 @@ void sub_800151C(u8 a, u8 b);
 void sub_800151C(u8 a, u8 b);
 void sub_8001530(u16 *a, u16 *b);
 void sub_800154C(void* outTm, void const* inData, u8 base, u8 linebits);
-void sub_800159C(u16 *a1, u16 *a2, s16 a3, s16 a4, u16 a5);
+void AddAttr2dBitMap(u16 * _dst, u16 * _src, s16 ix, s16 iy, u16 chr);
 // ??? sub_80016C4(???);
 void MaybeResetSomePal(void);
 void MaybeSmoothChangeSomePal(u16 *src, int b, int c, int d);
@@ -408,7 +401,7 @@ void SetSecondaryHBlankHandler(void(*)(void));
 int GetBackgroundFromBufferPointer(u16 *ptr);
 void BG_SetPriority(int bg, int priority);
 int BG_GetPriority(int bg);
-void SetSpecialColorEffectsParameters(u16 effect, u8 coeffA, u8 coeffB, u8 blendY);
+void SetBlendConfig(u16 effect, u8 coeffA, u8 coeffB, u8 blendY);
 void SetBlendTargetA(int, int, int, int, int);
 void SetBlendTargetB(int, int, int, int, int);
 void SetBlendBackdropA(int);

@@ -39146,3 +39146,35 @@ fun __umodsi3, __aeabi_uidivmod
 
 dat 0x02000000, gAnims
 dat 0x03000000, gRNSeeds
+
+dat 0x08FFFFF4, barrackUnitCounter
+
+
+fun 0x08026628 + 1, ApplyUnitSpritePalettes
+fun 0x080b5604 + 1, Shop_TryMoveHandPage
+fun 0x080b5698 + 1, ShopSt_GetBg2Offset 
+fun 0x080b568c + 1, ShopSt_GetHeadLoc
+fun 0x080b56a8 + 1, ShopSt_GetHandLoc
+fun 0x080b56cc + 1, IsShopPageScrolling
+fun 0x080b44a8 + 1, Shop_Loop_BuyKeyHandler
+fun 0x08014b88 + 1, PlaySeDelayed
+fun 0x080b4f90 + 1, DrawShopSoldItems
+fun 0x080b4474 + 1, Shop_InitBuyState
+fun 0x080b43bc + 1, ShopDrawBuyItemLine
+fun 0x080b55ac + 1, RegisterShopState
+fun 0x080b464c + 1, Shop_TryAddItemToInventory
+
+fun 0x08092bf0 + 1, SortUnitList
+fun 0x080922f0 + 1, UnitList_PutRow
+fun 0x08090358 + 1, sub_8090358
+fun 0x08a17fa8 + 1, gUnitListScreenFields
+fun 0x080913d8 + 1, UnitList_ToggleSoloAnimState
+fun 0x0809132c + 1, UnitList_TogglePrepDeployState
+fun 0x080c4070 + 1, GetGMapBaseMenuKind
+fun 0x080b5498 + 1, ShopTryMoveHand
+fun 0x080b987c + 1, WorldMap_CallGuide
+fun 0x080b50c8 + 1, ShopDrawDefaultSellItemLine
+fun 0x080b5164 + 1, DrawShopItemPriceLine
+fun 0x080b4a54 + 1, Shop_Loop_UnkKeyHandler
+
+dat 0x0200d6e0, gSortedUnits

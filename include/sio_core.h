@@ -4,6 +4,7 @@
 #include "global.h"
 
 #include "proc.h"
+#include "fontgrp.h"
 
 #define SIO_MAX_PACKET 0x80
 
@@ -132,18 +133,18 @@ struct SioSt
 
 #define SIO_MAX_DATA (SIO_MAX_PACKET - offsetof(struct SioData, bytes))
 
-int sub_80415B0(void);
-int sub_80416D0(void);
+int SioPollingMsg(void);
+int GetSioIndex(void);
 void sub_80416E0(u16 arg_0, u16 sioCnt, u16 arg_2);
 void sub_8041718(void);
 void sub_8041898(void);
 void SioRegisterIrq(void);
 void SioReleaseIrq(void);
 void SioHandleIrq_Serial(void);
-void sub_8041C1C(void);
+void SioVsync_Loop(void);
 void SioHandleIrq_Timer3(void);
 void sub_8041D8C(int num);
-void sub_8041DC4(void);
+void SioMain_Loop(void);
 void sub_8042138(void);
 int sub_804213C(void);
 int sub_8042168(void);
@@ -193,14 +194,27 @@ extern struct ProcCmd CONST_DATA gProcScr_SioBigReceive[];
 
 struct LinkArenaStMaybe
 {
-    // TODO: this layout is very temporary, hopefully
-    // +0x0C is TextHandles
-    u8 unk_00;
-    STRUCT_PAD(0x01, 0x03);
-    u8 unk_03;
-    STRUCT_PAD(0x04, 0x9C);
-    u8 unk_9C[5];
-    u8 unk_A1[15][15];
+    /* 00 */ u8 unk_00;
+    /* 01 */ u8 unk_01;
+    STRUCT_PAD(0x02, 0x03);
+    /* 03 */ u8 unk_03;
+    /* 04 */ u8 unk_04;
+    /* 05 */ u8 unk_05;
+    /* 06 */ u8 unk_06[4];
+    /* 0A */ u8 unk_0A;
+    /* 0B */ u8 unk_0B;
+    /* 0C */ struct Text texts[11];
+    /* 64 */ struct Text unk_64[7]; // maybe not all text?
+    /* 9C */ u8 linking_status[4];
+    /* A0 */ u8 unk_A0;
+    /* A1 */ u8 unk_A1[4][15];
+    STRUCT_PAD(0xDD, 0xEC);
+    struct LinkArenaStMaybe_ec
+    {
+        u8 unk_0_0 : 1;
+        u8 unk_0_1 : 1;
+        u8 unk_0_2 : 1;
+    } unk_ec;
 };
 
 extern struct LinkArenaStMaybe gLinkArenaSt;

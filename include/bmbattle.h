@@ -22,12 +22,7 @@ struct BattleUnit {
 
     /* 48 */ u16 weapon;
     /* 4A */ u16 weaponBefore;
-	#ifndef FE6 
     /* 4C */ u32 weaponAttributes;
-	#endif 
-	#ifdef FE6 
-    /* 4C */ u16 weaponAttributes;
-	#endif 
     /* 50 */ u8 weaponType;
     /* 51 */ u8 weaponSlotIndex;
 
@@ -51,9 +46,8 @@ struct BattleUnit {
     /* 66 */ short battleCritRate;
     /* 68 */ short battleDodgeRate;
     /* 6A */ short battleEffectiveCritRate;
-	#ifndef FE6 
     /* 6C */ short battleSilencerRate;
-	#endif 
+
     /* 6E */ s8 expGain;
     /* 6F */ s8 statusOut;
     /* 70 */ s8 levelPrevious;
@@ -76,7 +70,6 @@ struct BattleUnit {
 
     /* 7E */ s8 hasItemEffectTarget;
     /* 7F */ /* pad */
-	u8 padding;
 };
 
 struct BattleStats {
@@ -208,8 +201,8 @@ void BattleInitTargetCanCounter(void);
 void InitObstacleBattleUnit(void);
 void UpdateObstacleFromBattle(struct BattleUnit* bu);
 void BeginBattleAnimations(void);
-int GetUnitSoloBattleAnimType(struct Unit* unit);
-int GetBattleAnimType(void);
+int GetSoloAnimPreconfType(struct Unit* unit);
+int GetBattleAnimPreconfType(void);
 void BattleInitItemEffect(struct Unit* actor, int itemSlot);
 void BattleInitItemEffectTarget(struct Unit* unit);
 void BattleApplyMiscAction(struct Proc* proc);

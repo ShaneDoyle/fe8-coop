@@ -1,11 +1,13 @@
 #ifndef GUARD_TYPES_H
 #define GUARD_TYPES_H
 
+#include "prelude.h"
 #include "gba/types.h"
+#include <limits.h>
 
 #ifndef __STDBOOL_H__
-// typedef s8 bool;
-// enum { false, true };
+typedef s8 bool;
+enum { false, true };
 #define false	false
 #define true	true
 #define __bool_true_false_are_defined	1
@@ -53,12 +55,13 @@ typedef void (*InterruptHandler)(void);
 
 struct Vec2 { short x, y; };
 struct Vec2u { u16 x, y; };
+struct Vec2l { int x, y; }; // also Struct0859E7D4
 
 struct BmSt // Game State Struct
 {
-    /* 00 */ s8  sync_hardware;
+    /* 00 */ s8  main_loop_ended;
 
-    /* 01 */ s8  gameLogicSemaphore;
+    /* 01 */ s8  lock;
     /* 02 */ s8  gameGfxSemaphore;
 
     /* 03 */ u8  _unk04;
@@ -103,7 +106,7 @@ enum BmSt_gameStateBits {
     BM_FLAG_1 = (1 << 1),
     BM_FLAG_2 = (1 << 2),
     BM_FLAG_3 = (1 << 3),
-    BM_FLAG_4 = (1 << 4),
+    BM_FLAG_PREPSCREEN = (1 << 4),
     BM_FLAG_5 = (1 << 5),   /* Maybe mute battle-anim BGM ? */
     BM_FLAG_LINKARENA = (1 << 6),
 };
@@ -221,6 +224,14 @@ struct PlaySt { // Chapter Data Struct
     u8 tutorial_counter;
 } BITPACKED;
 
+/* PlaySt::config::animationType */
+enum PlaySt_AnimConfType {
+    PLAY_ANIMCONF_ON = 0,
+    PLAY_ANIMCONF_OFF = 1,
+    PLAY_ANIMCONF_SOLO_ANIM = 2,
+    PLAY_ANIMCONF_ON_UNIQUE_BG = 3,
+};
+
 /**
  * Use with PlaySt field chapterStateBits
  */
@@ -233,7 +244,7 @@ enum PlaySt_chapterStateBits {
     PLAY_FLAG_PREPSCREEN      = (1 << 4),
     PLAY_FLAG_COMPLETE        = (1 << 5),
     PLAY_FLAG_HARD            = (1 << 6),
-    PLAY_FLAG_EXTRA_MAP               = (1 << 7),
+    PLAY_FLAG_EXTRA_MAP       = (1 << 7),
 
     PLAY_FLAG_STATSCREENPAGE_SHIFT = 0,
     PLAY_FLAG_STATSCREENPAGE_MASK = PLAY_FLAG_STATSCREENPAGE0 | PLAY_FLAG_STATSCREENPAGE1,
@@ -352,6 +363,13 @@ enum
 
 enum
 {
+    BATTLEMAP_KIND_STORY = 0,
+    BATTLEMAP_KIND_DUNGEON = 1,
+    BATTLEMAP_KIND_SKIRMISH = 2,
+};
+
+enum
+{
     GOAL_TYPE_SEIZE = 0,
     GOAL_TYPE_DEFEAT_ALL = 1,
     GOAL_TYPE_DEFENSE = 2,
@@ -361,7 +379,7 @@ enum
 
 struct SMSHandle
 {
-    /* 00 */ struct SMSHandle* pNext;
+    /* 00 */ struct SMSHandle * pNext;
 
     /* 04 */ short xDisplay;
     /* 06 */ short yDisplay;
@@ -370,12 +388,6 @@ struct SMSHandle
 
     /* 0A */ u8 _u0A;
     /* 0B */ s8 config;
-};
-
-struct MMSData
-{
-    const void* pGraphics;
-    const void* pAnimation;
 };
 
 struct MapChange

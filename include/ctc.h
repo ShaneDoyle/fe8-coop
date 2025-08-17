@@ -35,7 +35,7 @@ struct OAM_Attr0 {
 #define OAM0_SHAPE_32x64   0x8000
 
 #define OAM1_X(ax)         ((ax) & 0x01FF)
-#define OAM1_AFFINE_ID(ai) (((ai) << 9) & 0x3E00)
+#define OAM1_AFFINE_ID(ai) ((ai) << 9)
 #define OAM1_HFLIP         0x1000
 #define OAM1_VFLIP         0x2000
 #define OAM1_SIZE_8x8      0x0000
@@ -89,5 +89,12 @@ void PushSpriteLayerObjects(int layer);
 
 struct SpriteProc * StartSpriteRefresher(ProcPtr parent, int layer, int x, int y, const u16* object, int tileref);
 void MoveSpriteRefresher(struct SpriteProc* proc, int x, int y);
+
+#define SetObjAffineAuto(id, angle, x_scale, y_scale) \
+    SetObjAffine((id), \
+        Div(+COS((angle)) << 4, (x_scale)), \
+        Div(-SIN((angle)) << 4, (y_scale)), \
+        Div(+SIN((angle)) << 4, (x_scale)), \
+        Div(+COS((angle)) << 4, (y_scale)))
 
 #endif  // GUARD_CTC_H

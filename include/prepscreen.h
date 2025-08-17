@@ -108,6 +108,33 @@ enum prepitem_textindex {
 
 extern struct Text gPrepItemTexts[32];
 
+struct PrepItemSuppyText {
+    /* 00 */ struct Font font;
+    /* 18 */ struct Text th[18];
+};
+extern struct PrepItemSuppyText PrepItemSuppyTexts;
+
+/* This should be the same as: struct PrepItemSuppyText */
+struct Unknown02013648 {
+    /* 00 */ struct Font font;
+    /* 18 */ struct Text textA;
+    /* 20 */ struct Text textB;
+    /* 28 */ struct Text textArray[5];
+    /* 50 */ u8 _pad[0x90-0x50];
+    /* 90 */ struct Text textC;
+};
+#define _PrepItemSuppyTexts ((struct Unknown02013648 *)&PrepItemSuppyTexts)
+
+struct WmSellProc {
+    /* 00 */ PROC_HEADER;
+
+    /* 2C */ struct Unit* unit;
+    /* 30 */ u8 unk_30;
+    /* 31 */ u8 unk_31;
+    /* 32 */ u16 unk_32;
+    /* 34 */ u16 unk_34;
+};
+
 struct PrepItemSupplyProc {
     /* 00 */ PROC_HEADER;
 
@@ -123,16 +150,6 @@ struct PrepItemSupplyProc {
     /* 3A */ u16 idxPerPage[9];
     /* 4C */ u16 yOffsetPerPage[9];
 };
-
-// TODO: Move to a common "worldmap.h"
-struct GMapBaseMenuProc {
-    /* 00 */ PROC_HEADER;
-    /* 29 */ u8 unk_29;
-    /* 2A */ u8 unk_2a;
-    /* 2B */ u8 unk_2b;
-};
-
-struct GMapBaseMenuProc* sub_80C4048(void);
 
 struct PrepItemListProc {
     /* 00 */ PROC_HEADER;
@@ -153,7 +170,15 @@ struct SioPidPool {
 
 extern struct SioPidPool gSioPidPool;
 
-extern struct Text gPrepMainMenuTexts[9];
+struct Win1H {
+    /* 00 */ u8 left;
+    /* 01 */ u8 right;
+};
+
+extern struct Win1H gUnknown_02012F58[][160];
+extern struct Win1H* gUnknown_02013458[];
+
+extern struct Text gPrepMainMenuTexts[10];
 extern u8 gPrepUnitPool[];
 extern u8 gBanimScrRight[];
 extern struct PrepUnitList gPrepUnitList;
@@ -163,16 +188,8 @@ extern u16 gUnknown_02012F54;
 extern u16 gUnknown_02012F56;
 // extern ??? gUnknown_02012F58
 // extern ??? gUnknown_02013458
-// extern ??? gUnknown_02013460
-extern struct Text gPrepItemScreenTexts[16];
-extern struct Text gUnknown_02013590[];
-extern struct Text gPrepUnitTexts[];
-// extern ??? gUnknown_02013648
-extern struct Text gUnknown_02013660[16];
-// extern ??? gUnknown_02013668
-// extern ??? gUnknown_02013670
-// extern ??? gUnknown_02013698
-// extern ??? gUnknown_020136D8
+extern u16 gUnknown_02013460[];
+extern struct Text gPrepUnitTexts[0x16];
 extern int sSupportScreenUnitCount;
 extern u16 gUnknown_020136F4[];
 
@@ -242,13 +259,13 @@ extern u16 CONST_DATA Img_PrepHelpButtonSprites[];
 extern u8 Img_MenuScrollBar[];
 extern u16 Pal_MenuScrollBar[];
 extern u8 gUnknown_08A19CCC[]; // gfx
-extern u16 gUnknown_08A1A084[]; // pal
+extern u16 Pal_SpinningArrow[]; // pal
 extern u8 gUnknown_08A1A0A4[]; // gfx
 extern u8 gUnknown_08A1A23C[]; // gfx
 extern u16 gUnknown_08A1A3FC[]; // pal
-extern u8 CONST_DATA gUnknown_08A1A41C[];
-extern u8 CONST_DATA gUnknown_08A1A434[];
-extern u8 CONST_DATA gUnknown_08A1A474[];
+extern u8 CONST_DATA Tsa_08A1A41C[];
+extern u8 CONST_DATA Tsa_08A1A434[];
+extern u8 CONST_DATA Tsa_08A1A474[];
 extern u8 CONST_DATA gUnknown_08A1A4C8[];
 extern u8 gGfx_SupportScreenBanner[];
 extern u8 CONST_DATA gUnknown_08A1AC88[];
@@ -269,25 +286,25 @@ extern u16 CONST_DATA Img_PrepItemUseScreen[];
 extern u16 CONST_DATA Tsa_PrepItemUseScreen[];
 extern u8 gUnknown_08A1BBD0[]; // tsa?
 extern u8 gUnknown_08A1BCC0[];
-// extern ??? gUnknown_08A1BD00
+extern u16 gUnknown_08A1BD00[]; // pal
 // extern ??? gUnknown_08A1BD40
 extern u16 gUnknown_08A1BD60[];
-extern u8 gImg_UiSpinningArrow_Vertical[]; // arrow gfx
+extern u8 Img_SpinningArrow[]; // arrow gfx
 extern u8 gImg_UiSpinningArrow_Horizontal[];
-// extern ??? gUnknown_08A1C8B4
-// extern ??? gUnknown_08A1CD68
-// extern ??? gUnknown_08A1CDC4
-// extern ??? gUnknown_08A1D288
+extern u8 gUnknown_08A1C8B4[]; // tsa
+extern u8 Img_08A1CD68[];
+extern u8 Img_UnitListBanners[];
+extern u8 Img_UnitListBanner_Animation[];
 extern u16 Pal_08A1D448[];
 extern u16 CONST_DATA gUnknown_08A1D4C8[];
 extern u8 Img_PrepTextShadow[];
 extern u8 CONST_DATA gUnknown_08A1D510[];
 extern u16 CONST_DATA Pal_MapBattleInfoNum[]; // 'R is info' palette
 extern u8 Img_PrepPopupWindow[];
-extern u16 gUnknown_08A1D850[];
-extern u16 gUnknown_08A1D870[];
-extern u16 gUnknown_08A1D890[];
-extern u16 gUnknown_08A1D8B0[];
+extern u16 Pal_08A1D850[];
+extern u16 Pal_08A1D870[];
+extern u16 Pal_08A1D890[];
+extern u16 Pal_08A1D8B0[];
 extern u8 Img_PrepWindow[];
 extern u8 gUnknown_08A1DB80[];
 extern u8 gTsa_SupportSubScreen[];
@@ -711,7 +728,7 @@ struct PrepMenuTradeProc {
 void PrepItemTrade_ApplyItemSwap(struct Unit * unitA, int itemSlotA, struct Unit * unitB, int itemSlotB);
 s8 PrepItemTrade_DpadKeyHandler(struct PrepMenuTradeProc * proc);
 void DrawPrepScreenItems(u16*, struct Text*, struct Unit*, u8);
-void DrawPrepScreenItemIcons(u16* tm, struct Unit* unit);
+void DrawPrepScreenItemIcons(u16 * tm, struct Unit* unit);
 void PrepItemTrade_Init(struct PrepMenuTradeProc * proc);
 void PrepItemTrade_Loop_MainKeyHandler(struct PrepMenuTradeProc * proc);
 void PrepItemTrade_OnEnd(void);
