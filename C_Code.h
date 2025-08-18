@@ -1,6 +1,7 @@
 
 //#include "include/gbafe.h" 
 #include "gbafe.h" 
+#define CHAR_NEWLINE 0x01
 const bool isBarracks = true;
 const char* barracksRecruitableUnits[10] = {
 "Cavalier",

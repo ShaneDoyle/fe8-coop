@@ -8,6 +8,9 @@
 /* Original */
 extern UnitIconWait unit_icon_wait_table[];
 #define GetInfo(id) (unit_icon_wait_table[(id) & ((1<<7)-1)])
+extern int unused_0203e760; // P2 flag.
+extern u8 gUnused_0203E884[10]; // Barracks Unit List.
+extern int gUnused_0859166C; // Should do barracks or not.
 
 /* New */
 int Barracks_GetLineOffset(){
@@ -28,14 +31,14 @@ typedef struct {
 } barrackUnitDef;
 
 static barrackUnitDef barrackUnits[8][20] = {
-    // ITYPE_SWORD
+    // WORD
     {
         {"Cavalier",  	CLASS_CAVALIER,   	3000, 0x04, {ITYPE_SWORD, ITYPE_LANCE}, {21, 5, 5, 5, 3, 5, 1, 7}},
         {"Mercenary", 	CLASS_MERCENARY,  	3000, 0x0A, {ITYPE_SWORD, -1}, {20, 4, 6, 6, 3, 3, 1, 5}},
         {"Myrmidon",   CLASS_MYRMIDON,		2500, 0x0E, {ITYPE_SWORD, -1}, {19, 3, 6, 7, 3, 2, 2, 5}},
         {"Thief",   CLASS_THIEF,   			3500, 0x08, {ITYPE_SWORD, -1}, {18, 2, 7, 8, 3, 1, 1, 6}},
     },
-    // ITYPE_LANCE
+    // LANCE
     {
         {"Cavalier",  	CLASS_CAVALIER,   		3000, 0x04, {ITYPE_SWORD, ITYPE_LANCE}, {21, 5, 5, 5, 3, 5, 1, 7}},
         {"Knight",      CLASS_ARMOR_KNIGHT,		2500, 0x06, {ITYPE_LANCE, -1}, 			{22, 7, 2, 1, 3, 8, 1, 4}},
@@ -43,31 +46,31 @@ static barrackUnitDef barrackUnits[8][20] = {
 		{"Soldier", 	CLASS_SOLDIER,        	2500, 0x3F, {ITYPE_LANCE,  -1},			{18, 4, 7, 7, 3, 3, 0, 5}},
         {"Wyvern Rider",CLASS_WYVERN_RIDER,   	3500, 0x19, {ITYPE_LANCE, -1}, 			{21, 6, 4, 5, 3, 6, 0, 0}},
     },
-    // ITYPE_AXE
+    // AXE
     {
         {"Brigand", CLASS_BRIGAND, 2500, 0x33, {ITYPE_AXE, -1}, {22, 6, 4, 6, 3, 2, 0, 5}},
         {"Fighter", CLASS_FIGHTER, 2500, 0x31, {ITYPE_AXE, -1}, {22, 7, 5, 4, 3, 1, 0, 5}},
         {"Pirate",  CLASS_PIRATE,  2500, 0x34, {ITYPE_AXE, -1}, {22, 5, 7, 6, 3, 2, 0, 5}},
     },
-    // ITYPE_BOW
+    // BOW
     {
         {"Archer", CLASS_ARCHER, 2500, 0x14, {ITYPE_BOW, -1}, {22, 7, 5, 4, 3, 1, 0, 5}},
     },
-    // ITYPE_STAFF
+    // STAFF
     {
         {"Cleric", CLASS_CLERIC, 2500, 0x3B, {ITYPE_STAFF, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
         {"Priest", CLASS_PRIEST, 2500, 0x37, {ITYPE_STAFF, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
         {"Troubadour", CLASS_TROUBADOUR, 3500, 0x3C, {ITYPE_STAFF, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
     },
-    // ITYPE_ANIMA
+    // ANIMA
     {
         {"Mage", CLASS_MAGE, 2500, 0x1E, {ITYPE_ANIMA, -1}, {18, 5, 4, 5, 0, 1, 3, 5}},
     },
-    // ITYPE_LIGHT
+    // LIGHT
     {
         {"Monk", CLASS_MONK, 2500, 0x36, {ITYPE_LIGHT, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
     },
-    // ITYPE_DARK
+    // DARK
     {
         {"Shaman", CLASS_SHAMAN, 3000, 0x26, {ITYPE_DARK, -1}, {20, 6, 3, 3, 0, 3, 3, 5}},
     },
@@ -86,18 +89,7 @@ static int barrackUnitCounts[8] = {
 
 int Barracks_CountUnitsByWeapon(int weaponType) {
 	return barrackUnitCounts[weaponType];
-	/*
-    while (barrackUnits[weaponType][count].classId != -1) {
-        count++;
-    }
-    return count;
-	*/
 }
-
-
-extern int unused_0203e760; // P2 flag.
-extern u8 gUnused_0203E884[10]; // Barracks Unit List.
-extern int gUnused_0859166C; // Should do barracks or not.
 
 
 void Barracks_DrawUnitWeaponIcon(u16* BgOut, int IconIndex, int OamPalBase){
@@ -232,7 +224,9 @@ void Barracks_AddUnitToParty(void) {
 
     // 3.3. Ai (is null)
     for (i = 0; i < 4; ++i)
+	{
         gUnitDef1.ai[i] = 0;
+	}
 
     // 4. Load unit
     //unit = GetUnitFromCharId(gSummonConfig[summonerNum][1]);
@@ -320,27 +314,10 @@ void Barracks_DisplayUnits(void) {
 }
 
 void Barracks_DrawItemMenuLine(struct Text* text, int item, s8 isUsable, u16* mapOut) {
-	// TODO: MAKE GLOBAL
 	int tab = gUnused_0203E884[1];
     Text_SetParams(text, 0, (isUsable ? TEXT_COLOR_SYSTEM_WHITE : TEXT_COLOR_SYSTEM_GRAY));
-    Text_DrawString(text, barrackUnits[tab][item-1].name); // TODO: this is causing a crash?
-	
-	//if(unused_0203e760 >= 4)
-	{
-		
-		//unused_0203e760 = 4;
-		
-	}
+    Text_DrawString(text, barrackUnits[tab][item-1].name);
     PutText(text, mapOut + 2);
-}
-
-
-//! FE8U = 0x0809D2C4
-void StoreConvoyWeaponIconGraphics(int vramOffset, int pal) {
-    ApplyPalette(gUnknown_08A1A3FC, pal);
-    Decompress(gUnknown_08A1A0A4, (void*)(0x6000000 + vramOffset));
-    Decompress(gUnknown_08A1A23C, (void*)(0x6000200 + vramOffset));
-    return;
 }
 
 /***** bmshop.c *****/
@@ -348,20 +325,6 @@ void DisplayShopUiArrows(void) {
 	if(isBarracks)
 	{
 		Barracks_DisplayUnits();
-		
-	
-		for (int i=0; i<7; i++)
-		{
-			if(gUnused_0203E884[1] == i)
-			{
-				//Barracks_DrawUnitWeaponIcon(gBG0TilemapBuffer + TILEMAP_INDEX(7 + (i*2), 6), i, OAM2_PAL(1));
-			}
-			else
-			{
-				//Barracks_DrawUnitWeaponIcon(gBG0TilemapBuffer + TILEMAP_INDEX(7 + (i*2), 6), i, OAM2_PAL(5));
-			}
-		}
-	
 	}
 	
 	if (ShouldDisplayUpArrow())
@@ -376,27 +339,6 @@ void DisplayShopUiArrows(void) {
             OBJ_PALETTE(OBJPAL_SHOP_SPINARROW) + OBJ_CHAR(OBJCHR_SHOP_SPINARROW),
             false);
 }
-
-void BarracksHandleShopBuyAction(struct ProcShop * proc) {
-    PlaySeDelayed(0xB9, 8);
-
-    gActionData.unitActionType = UNIT_ACTION_SHOPPED;
-
-    SetPartyGoldAmount(
-        GetPartyGoldAmount() - GetItemPurchasePrice(proc->unit, proc->shopItems[proc->head_loc]));
-
-    UpdateShopItemCounts(proc);
-    DrawShopSoldItems(proc);
-
-    DisplayGoldBoxText(TILEMAP_LOCATED(gBG0TilemapBuffer, 27, 6));
-	
-	if (isBarracks)
-	{
-		Barracks_AddUnitToParty();
-	}
-}
-
-
 
 void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
     u8 head_loc;
@@ -432,7 +374,6 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
         StartItemHelpBox(56, a - b, proc->shopItems[proc->head_loc]);
     }
     DisplayShopUiArrows();
-	//Barracks_DisplayUnits();
 
     if (IsShopPageScrolling() != 0)
         return;
@@ -449,65 +390,18 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 
     if (gKeyStatusPtr->newKeys & R_BUTTON)
     {
-		//UnitSlide_SetNewUnit(struct StatScreenEffectProc* proc)
-		
-		//EndAllMus();
-
 		struct Unit *unit;
 		
 		// Just get first valid unit, doesn't really matter.
 		for (int i=FACTION_BLUE + 1; i<FACTION_GREEN; i++)
 		{
 			unit = GetUnit(i);
-
 			if (UNIT_IS_VALID(unit))
 			{
 				break;
 			}
 		}
-		
-		//ss_proc = Proc_Find(ProcScr_UnitListScreen_PrepMenu);
-		
-		//struct UnitListScreenProc * list_proc;
-        //list_proc = Proc_StartBlocking(ProcScr_UnitListScreen_PrepMenu, proc);
-		
-		//EndAllMus();
-		//EndPlayerPhaseSideWindows();
-		//SetStatScreenConfig(
-		//	STATSCREEN_CONFIG_NONDEAD | STATSCREEN_CONFIG_NONBENCHED | STATSCREEN_CONFIG_NONUNK9 |
-		//	STATSCREEN_CONFIG_NONROOFED | STATSCREEN_CONFIG_NONUNK16);
-			
-		//StartStatScreen(unit, proc);
-		//gUnused_0203E884[2] = 69;
-		//Proc_End(proc);
-        //Proc_Goto(proc, 1);
-		
-		//Proc_StartBlocking(gProcScr_ShopFadeIn, proc);
 
-		
-		//Proc_Goto(list_proc, 3);
-		/* Loading but black screen (that doesn't crash) after.
-		EndAllMus();
-		EndPlayerPhaseSideWindows();
-		SetStatScreenConfig(
-			STATSCREEN_CONFIG_NONDEAD | STATSCREEN_CONFIG_NONBENCHED | STATSCREEN_CONFIG_NONUNK9 |
-			STATSCREEN_CONFIG_NONROOFED | STATSCREEN_CONFIG_NONUNK16);
-			
-		StartStatScreen(unit, proc);
-		
-		
-		
-		
-		
-        //Proc_Goto(proc, 5);
-		
-		//gStatScreen.unit = GetUnit(0);
-
-		//StatScreen_Display(Proc_Find(gProcScr_StatScreen));
-		//Proc_Break(ss_proc);
-		//Proc_Goto(ss_proc, 1);*/
-		
-		
         proc->helpTextActive = 1;
         a = (proc->head_loc * 16);
         b = ((proc->hand_loc * 16) - 72);
@@ -516,39 +410,8 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 		
         return;
     }
-	
-	if(gUnused_0203E884[2] == 69)
-	{
-		
-		//StartPrepItemScreen(proc);
-		//struct PrepItemScreenProc* itemProc = Proc_Find(ProcScr_PrepItemScreen);
-		//Proc_Goto(itemProc, 5);
-		//Shop_Init(proc);
-		//Shop_InitBuyState(proc);
-		//Proc_Break(proc);
-		//Proc_Break(proc);
-		
-        //proc = Proc_Start(gProcScr_Shop, PROC_TREE_3);
-		/*
-		EndPlayerPhaseSideWindows();
-		StartShopFadeIn(proc);
-		Shop_Init(proc);
-		FadeInBlackSpeed20(proc);*/
-		
-        //proc = Proc_Start(gProcScr_Shop, PROC_TREE_3);
-		gUnused_0203E884[2] = 0;
-		
-		//Proc_Break(Proc_Find(gProcScr_StatScreen));
-		//StartShopFadeOut(proc);
-        //Proc_Goto(proc, 1);
-		//StartShopFadeIn(
-	}
-	
-	//gUnused_0203E884[2]++;
-	
 
     price = GetItemPurchasePrice(proc->unit, proc->shopItems[proc->head_loc]);
-	
 
     if (gKeyStatusPtr->newKeys & A_BUTTON)
     {
@@ -589,21 +452,27 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 		// Do weapon tab swapping.
 		if (gKeyStatusPtr->repeatedKeys & DPAD_RIGHT)
 		{
-			gUnused_0203E884[1]++;
-			if(gUnused_0203E884[1] > 7)
+			if(gUnused_0203E884[1] >= 7)
 			{
 				gUnused_0203E884[1] = 0;
+			}
+			else
+			{
+				gUnused_0203E884[1]++;
 			}
             PlaySoundEffect(SONG_SE_SYS_WINDOW_SELECT1);
 			refreshTab = true;
 		}
 			
-		if(gKeyStatusPtr->repeatedKeys & DPAD_LEFT)
+		else if(gKeyStatusPtr->repeatedKeys & DPAD_LEFT)
 		{
-			gUnused_0203E884[1]--;
-			if(gUnused_0203E884[1] < 0)
+			if(gUnused_0203E884[1] <= 0)
 			{
 				gUnused_0203E884[1] = 7;
+			}
+			else
+			{
+				gUnused_0203E884[1]--;
 			}
             PlaySoundEffect(SONG_SE_SYS_WINDOW_SELECT1);
 			refreshTab = true;
@@ -611,11 +480,10 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 		
 		if(refreshTab)
 		{
-			
 			u8 tab = gUnused_0203E884[1];
 			BG_Fill(gBG2TilemapBuffer, 0);
 		
-			// Reset the shop back to top and set number of available lines.
+			// Reset the shop back, such as hand location, lines to draw, available items etc.
 			ShopSt_SetHeadLocBak(0);
 			gUnused_0203E884[0] = 0; // Reset custom indexer for unit selected.
 			gShopState->head_loc = 0;
@@ -624,38 +492,10 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 			gShopState->hand_loc = 0;
 			gShopState->px_per_line = 16;
 			gShopState->trig = 4;
-			//gShopState->draw_line = func;
-			//gShopState->proc = proc;
-			//gShopState->bg2_base = -bg2_base;
 			gShopState->bg2_off = gShopState->hand_loc * 16;
-			//Shop_InitBuyState(proc);
-			//BarracksHandleShopBuyAction(proc);
-			//proc->shopItems[2] = MakeNewItem(0);//MakeNewItem(*shopItems++);
-			//UpdateShopItemCounts(proc);
-					
 					
 			// Refreshes the text of units.
 			DrawShopSoldItems(proc);
-			
-			
-			
-			/*
-			for (int i = 0; i < Barracks_CountUnitsByWeapon(tab); i++)
-			{
-				PutBlankText(
-					&gShopItemTexts[DivRem(i, 2 + 1)],
-					gBG2TilemapBuffer + TILEMAP_INDEX(7, ((i * 2) & 0x1F)));
-
-				//BG_SetPosition(2, 0, -0x48);
-				BG_EnableSyncByMask(BG2_SYNC_BIT);
-			}
-				
-			
-			for (int i = 0; i<Barracks_CountUnitsByWeapon(tab); i++)
-			{
-				ShopDrawBuyItemLine(proc, i);
-			}
-			*/
 		}
 	}
 	
@@ -672,11 +512,6 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 		}
 	}
 	BG_EnableSyncByMask(BG0_SYNC_BIT);
-}
-
-void StartArmoryScreen(struct Unit * unit, u16 * shopItems, ProcPtr parent)
-{
-    StartShopScreen(unit, shopItems, SHOP_TYPE_ARMORY, parent);
 }
 
 void Shop_TryAddItemToInventory(struct ProcShop * proc) {
@@ -715,12 +550,6 @@ void Shop_TryAddItemToInventory(struct ProcShop * proc) {
     Proc_Goto(proc, PL_SHOP_BUY_DONE);
 }
 
-
-int Barracks_MakeNewItem(int item) {
-	return 11777;
-}
-
-#define CHAR_NEWLINE 0x01
 void GetStringTextBox(const char* _str, int *out_width, int *out_height) {
 	if(isBarracks)
 	{
@@ -841,15 +670,6 @@ void StartShopScreen(struct Unit * unit, const u16 * inventory, u8 shopType, Pro
 
     EndPlayerPhaseSideWindows();
 
-	if(isBarracks)
-	{
-		for (int i=0; i<10; i++)
-		{
-			gUnused_0203E884[i] = 0;
-		}
-	}
-			//gUnused_0203E884[] = 1;
-
     if (parent)
         proc = Proc_StartBlocking(gProcScr_Shop, parent);
     else
@@ -861,22 +681,19 @@ void StartShopScreen(struct Unit * unit, const u16 * inventory, u8 shopType, Pro
     shopItems = gDefaultShopInventory;
     if (inventory != 0)
         shopItems = inventory;
-	
-	
-	// Hardcode items 1->20 as entries. This will allow us to track each unit.
-	u8 tab = gUnused_0203E884[1];
+
 	if(isBarracks)
 	{
+		// Reset Barracks variables.
+		for (int i=0; i<10; i++)
+		{
+			gUnused_0203E884[i] = 0;
+		}
+		
+		u8 tab = gUnused_0203E884[1];
 		for (i = 0; i < Barracks_CountUnitsByWeapon(tab); i++)
 		{
-			//if (i < 14 + 999)
-			{
-				proc->shopItems[i] = 1+i; //i+1;//MakeNewItem(*shopItems++);
-			}
-			//else
-			{
-				//proc->shopItems[i] = MakeNewItem(*shopItems++);
-			}
+			proc->shopItems[i] = 1+i; // Hardcode entry 1->(amount of units that can use that weapon). At start, this will always be Sword.
 		}
 	}
 	else
@@ -888,74 +705,18 @@ void StartShopScreen(struct Unit * unit, const u16 * inventory, u8 shopType, Pro
     UpdateShopItemCounts(proc);
 }
 
-void Shop_InitBuyState(struct ProcShop * proc) {
-	for(int i=0; i<10; i++)
-	{
-		//proc->shopItems[i] = 0;
-	}
-    RegisterShopState(
-        proc->head_idx,
-        proc->shopItemCount,
-        5,
-        proc->hand_idx,
-        72,
-        ShopDrawBuyItemLine,
-        proc);
-}
-
-
 /***** bmitem.c *****/
 void DrawItemMenuLine(struct Text* text, int item, s8 isUsable, u16* mapOut) {
+	
+	// Draw Unit sprites and icons for weapons they can use.
 	if (isBarracks)
 	{
-		
 		Barracks_DrawItemMenuLine(text, item, true, mapOut);
 			
-
 		int tab = gUnused_0203E884[1];
 		for(int i=0; i<2; i++)
 		{
 			Barracks_DrawUnitWeaponIcon(mapOut + 9 + 2 * i, barrackUnits[tab][item-1].weapon[i], OAM2_PAL(5)); // Draw weapons unit can use.
-		}
-		
-		/*	// If unit has no entry for other weapon to use.
-		if(IconIndex == -1)
-		{
-			return;
-		}
-		
-		IconIndex += 112;
-		if (IconIndex < 0) {
-			BgOut[0]  = 0;
-			BgOut[1]  = 0;
-			BgOut[32] = 0;
-			BgOut[33] = 0;
-		} else {
-			u16 Tile = GetIconTileIndex(IconIndex) + OamPalBase;
-
-			BgOut[0]  = Tile++;
-			BgOut[1]  = Tile++;
-			BgOut[32] = Tile++;
-			BgOut[33] = Tile;
-		}*/
-		
-		
-		//DisplayGoldBoxText(TILEMAP_LOCATED(gBG1TilemapBuffer, 27, 16));
-		       // DrawIcon(gBG0TilemapBuffer + TILEMAP_INDEX(xPos+1, yPos), GetItemIconId(item), 0x4000);
-			   
-		extern u8 gUnused_085916BC; // DEBUG FLAG
-		//BG_SetPosition(0, 20, 40);
-		for (int i=0; i<7; i++)
-		{
-			//u8 *p = &gUnused_0203E884[1];
-			if(gUnused_0203E884[1] == i)
-			{
-				//Barracks_DrawUnitWeaponIcon(gBG0TilemapBuffer + TILEMAP_INDEX(7 + (i*2), 6), i, OAM2_PAL(1));
-			}
-			else
-			{
-				//Barracks_DrawUnitWeaponIcon(gBG0TilemapBuffer + TILEMAP_INDEX(7 + (i*2), 6), i, OAM2_PAL(5));
-			}
 		}
 
 		return;
@@ -971,8 +732,7 @@ void DrawItemMenuLine(struct Text* text, int item, s8 isUsable, u16* mapOut) {
     DrawIcon(mapOut, GetItemIconId(item), 0x4000);
 }
 
-void DrawShopSoldItems(struct ProcShop * proc)
-{
+void DrawShopSoldItems(struct ProcShop * proc) {
     int item;
     int index;
     int i;
@@ -1052,33 +812,12 @@ void DrawShopSoldItems(struct ProcShop * proc)
 
 
 /***** Multiplayer Fixes *****/
-void UndeployEveryone(void) {
-	unused_0203e760 = false; // P2 flag.
-    int i;
-	
-
-    ClearFlag(0x84);
-
-    if ((gPlaySt.unk4A_1) == 0)
-    {
-        for (i = 1; i < FACTION_GREEN; i++)
-        {
-            struct Unit * unit = GetUnit(i);
-
-            if (!UNIT_IS_VALID(unit))
-                continue;
-
-            unit->state &= ~(US_NOT_DEPLOYED);
-        }
-    }
-	
-	
-}
-
 void SwitchPhases(void) {
     switch (gPlaySt.faction) {
     case FACTION_BLUE:
         gPlaySt.faction = FACTION_RED;
+		
+		// Handle swapping between the internal teams on FACTION_BLUE.
         unused_0203e760 = !unused_0203e760;
 		if(unused_0203e760)
 		{
@@ -1112,20 +851,20 @@ void PhaseIntro_InitGraphics(ProcPtr proc) {
 
     switch (gPlaySt.faction)
     {
-
     case FACTION_BLUE:
+		// Player 2 (Green - PLAYER_PHASE).
 		if (unused_0203e760)
 		{
 			Decompress(Img_PhaseChangePlayer, BG_CHR_ADDR(BGCHR_PHASE_CHANGE_NAME));
 			ApplyPalette(Pal_PhaseChangeOther, BGPAL_PHASE_CHANGE);
 			ApplyPalette(Pal_PhaseChangeOther, 18);
 		}
+		// Default (Blue - PLAYER_PHASE).
 		else
 		{
 			Decompress(Img_PhaseChangePlayer, BG_CHR_ADDR(BGCHR_PHASE_CHANGE_NAME));
 			ApplyPalette(Pal_PhaseChangePlayer, BGPAL_PHASE_CHANGE);
 			ApplyPalette(Pal_PhaseChangePlayer, 18);
-
 		}
         break;
 
@@ -1140,13 +879,13 @@ void PhaseIntro_InitGraphics(ProcPtr proc) {
         ApplyPalette(Pal_PhaseChangeOther, BGPAL_PHASE_CHANGE);
         ApplyPalette(Pal_PhaseChangeOther, 18);
         break;
-
     }
 }
 
 int GetUnitSpritePalette(const struct Unit * unit) {
     switch (UNIT_FACTION(unit)) {
     case FACTION_BLUE:
+		// Player 2 - Force Green Palette.
 		if (unit->ai1 == 1)
 			return 0xE;
         return 0xC;
@@ -1161,8 +900,8 @@ int GetUnitSpritePalette(const struct Unit * unit) {
         return 0xB;
     }
 }
-int GetPlayerSelectKind(struct Unit * unit)
-{
+
+int GetPlayerSelectKind(struct Unit * unit) {
     u8 faction = gPlaySt.faction;
 
     if (!unit)
@@ -1200,9 +939,13 @@ int GetPlayerSelectKind(struct Unit * unit)
         return PLAYER_SELECT_TURNENDED;
     }
 
-    if ((unit->statusIndex != UNIT_STATUS_SLEEP) && (unit->statusIndex != UNIT_STATUS_BERSERK) && (unit->ai1 == unused_0203e760)) // P2, toggle control between factions.
+    if ((unit->statusIndex != UNIT_STATUS_SLEEP) && (unit->statusIndex != UNIT_STATUS_BERSERK))
     {
-        return PLAYER_SELECT_CONTROL;
+		// Only allow Units to be controllable for the active team (P1, P2 etc.).
+		if(unit->ai1 == unused_0203e760)
+		{
+			return PLAYER_SELECT_CONTROL;
+		}
     }
 
     return PLAYER_SELECT_NOCONTROL;
@@ -1217,7 +960,6 @@ s8 WorldMap_CallGuide(ProcPtr proc) {
 	for (int i=FACTION_BLUE + 1; i<FACTION_GREEN; i++)
 	{
 		unit = GetUnit(i);
-
 		if (UNIT_IS_VALID(unit))
 		{
 			break;
@@ -1233,8 +975,7 @@ s8 WorldMap_CallGuide(ProcPtr proc) {
 }
 
 
-int WMMenu_OnGuideDraw(struct MenuProc * menuProc, struct MenuItemProc * menuItemProc)
-{
+int WMMenu_OnGuideDraw(struct MenuProc * menuProc, struct MenuItemProc * menuItemProc) {
     if (!(menuProc->state & MENU_STATE_NOTSHOWN))
     {
         if (!BmGuideTextShowGreenOrNormal())
@@ -1246,8 +987,15 @@ int WMMenu_OnGuideDraw(struct MenuProc * menuProc, struct MenuItemProc * menuIte
         {
             Text_SetColor(&menuItemProc->text, TEXT_COLOR_SYSTEM_GRAY);
         }
-
-        Text_DrawString(&menuItemProc->text, "Barracks");
+		
+		if(isBarracks)
+		{
+			Text_DrawString(&menuItemProc->text, "Barracks");
+		}
+		else
+		{
+			Text_DrawString(&menuItemProc->text, GetStringFromIndex(menuItemProc->def->nameMsgId));
+		}
 
         PutText(
             &menuItemProc->text,
@@ -1259,34 +1007,7 @@ int WMMenu_OnGuideDraw(struct MenuProc * menuProc, struct MenuItemProc * menuIte
 }
 
 //! FE8U = 0x080917D8
-struct UnitListScreenProc {
-    /* 00 */ PROC_HEADER;
-    /* 29 */ u8 unk_29;
-    /* 2A */ u8 unk_2a;
-    /* 2B */ u8 helpActive;
-    /* 2C */ u8 unk_2c;
-    /* 2D */ u8 unk_2d;
-    /* 2E */ u8 unk_2e;
-    /* 2F */ u8 page;
-    /* 30 */ u8 unk_30;
-    /* 31 */ u8 unk_31;
-    /* 32 */ u8 unk_32;
-    /* 33 */ u8 unk_33;
-    /* 34 */ u8 unk_34;
-    /* 35 */ u8 unk_35;
-    /* 36 */ u8 pageTarget;
-    /* 37 */ u8 unk_37;
-    /* 38 */ u8 unk_38;
-    /* 39 */ u8 mode;
-    /* 3A */ u8 allyCount;
-    /* 3B */ u8 deployedCount;
-    /* 3C */ u16 unk_3c;
-    /* 3E */ u16 unk_3e;
-    /* 44 */ ProcPtr pSpriteProc;
-    /* 48 */ ProcPtr pMuralProc;
-};
 extern u8 gUnknown_0200F158;
-
 extern struct SortedUnitEnt * gSortedUnits[];
 void sub_809144C(struct UnitListScreenProc * proc) {
     if ((gKeyStatusPtr->newKeys & SELECT_BUTTON) != 0)
@@ -1456,125 +1177,7 @@ void sub_809144C(struct UnitListScreenProc * proc) {
     return;
 }
 
-void sub_80917D8(struct UnitListScreenProc * proc) {
-    int i;
-    u8 unk_32;
-
-    if (proc->helpActive != 0 && (gKeyStatusPtr->newKeys & (B_BUTTON | R_BUTTON)) != 0)
-    {
-        CloseHelpBox();
-        proc->helpActive = 0;
-        return;
-    }
-
-    if ((gKeyStatusPtr->newKeys & A_BUTTON) != 0 && proc->helpActive == 0)
-    {
-        unk_32 = proc->unk_32;
-
-        proc->unk_2a = 1;
-        PlaySoundEffect(SONG_SE_SYS_WINDOW_SELECT1);
-        proc->unk_32 = gUnitListScreenFields[proc->page][proc->unk_2d].sortKey;
-        proc->unk_33 = (proc->unk_33 + 1) & 1;
-
-        if (SortUnitList(proc->unk_32, proc->unk_33))
-        {
-            for (i = 0; i < 6 && i < gUnknown_0200F158; i++)
-            {
-                UnitList_PutRow(proc, i, gBG0TilemapBuffer, proc->page, 1);
-            }
-
-            sub_8090358(proc->unk_3e);
-            BG_EnableSyncByMask(1);
-        }
-
-        proc->unk_34 = proc->unk_33;
-        proc->unk_35 = proc->unk_2d;
-
-        if (proc->unk_32 != unk_32)
-            sub_8090238(proc->unk_32);
-
-        return;
-    }
-
-    if (((gKeyStatusPtr->repeatedKeys & DPAD_DOWN) != 0) && proc->helpActive == 0)
-    {
-        PlaySoundEffect(SONG_SE_SYS_CURSOR_UD1);
-        proc->unk_33 = 1;
-        proc->unk_29 = 0;
-        return;
-    }
-
-    if ((gKeyStatusPtr->repeatedKeys & DPAD_LEFT) != 0)
-    {
-        proc->unk_33 = 1;
-
-        if (proc->unk_2d == 0)
-        {
-            if (proc->page < 2)
-                return;
-
-            if (proc->mode == UNITLIST_MODE_SOLOANIM)
-                return;
-
-            PlaySoundEffect(SONG_6F);
-            proc->pageTarget--;
-
-            for (i = 8; i > 0 && gUnitListScreenFields[proc->pageTarget][i].xColumn == 0; i--)
-            {
-            }
-
-            proc->unk_2d = i;
-            Proc_Goto(proc, 2);
-            return;
-        }
-
-        proc->unk_2d--;
-        PlaySoundEffect(SONG_SE_SYS_CURSOR_LR1);
-        return;
-    }
-
-    if ((gKeyStatusPtr->repeatedKeys & DPAD_RIGHT) != 0)
-    {
-        proc->unk_33 = 1;
-
-        if (proc->unk_2d == 8 || gUnitListScreenFields[proc->page][proc->unk_2d + 1].xColumn == 0)
-        {
-            if (proc->page < proc->unk_2e)
-            {
-                if (proc->mode == UNITLIST_MODE_SOLOANIM)
-                    return;
-
-                proc->unk_2d = 0;
-                PlaySoundEffect(SONG_6F);
-
-                proc->pageTarget++;
-                Proc_Goto(proc, 2);
-            }
-            return;
-        }
-        else
-        {
-            proc->unk_2d++;
-            PlaySoundEffect(SONG_SE_SYS_CURSOR_LR1);
-        }
-
-        return;
-    }
-
-    if ((gKeyStatusPtr->newKeys & R_BUTTON) != 0 && proc->helpActive == 0)
-    {
-		//StartUnitSlide(GetUnit(0), 1, ss_proc);
-        proc->helpActive = 1;
-
-        //StartHelpBox(
-        //    gUnitListScreenFields[proc->page][proc->unk_2d].xColumn, 0x28,
-        //    gUnitListScreenFields[proc->page][proc->unk_2d].helpTextId);
-    }
-
-    return;
-}
-
-// World Map (List Handler).
+// World Map (List Handler) - Mainly for toggling units between teams at the World Map.
 void sub_8099120(struct PrepItemScreenProc* proc) {
     int tmp = proc->unk_34;
 
@@ -1665,8 +1268,7 @@ void sub_8099120(struct PrepItemScreenProc* proc) {
     return;
 }
 
-int ShopTryMoveHand(int pos, int pre, bool hscroll_en)
-{
+int ShopTryMoveHand(int pos, int pre, bool hscroll_en) {
     int previous;
 
     if (pos < 0)
@@ -1687,11 +1289,14 @@ int ShopTryMoveHand(int pos, int pre, bool hscroll_en)
         else
         {
             pos--;
-			gUnused_0203E884[0]--;
-			
-			if(gUnused_0203E884[0] < 0)
+
+			if(isBarracks)
 			{
-				gUnused_0203E884[0] = 0;
+				gUnused_0203E884[0]--;
+				if(gUnused_0203E884[0] <= 0)
+				{
+					gUnused_0203E884[0] = 0;
+				}
 			}
         }
     }
@@ -1704,10 +1309,14 @@ int ShopTryMoveHand(int pos, int pre, bool hscroll_en)
         }
         else
             pos++;
-			gUnused_0203E884[0]++;
-			if(gUnused_0203E884[0] >= gShopState->lines)
+
+			if(isBarracks)
 			{
-				gUnused_0203E884[0] = gShopState->lines;
+				gUnused_0203E884[0]++;
+				if(gUnused_0203E884[0] >= gShopState->lines)
+				{
+					gUnused_0203E884[0] = gShopState->lines;
+				}
 			}
     }
 
