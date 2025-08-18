@@ -27,36 +27,45 @@ typedef struct {
 	int startStats[8];
 } barrackUnitDef;
 
-static barrackUnitDef barrackUnits[7][20] = {
+static barrackUnitDef barrackUnits[8][20] = {
     // ITYPE_SWORD
     {
-        {"Mymidom",   CLASS_MYRMIDON,   2500, 0x0E, {ITYPE_SWORD, -1}, {19, 3, 6, 7, 3, 2, 2, 5}},
-        {"Mercenary", CLASS_MERCENARY,  3000, 0x0A, {ITYPE_SWORD, -1}, {20, 4, 6, 6, 3, 3, 1, 5}},
-        {"Cavalier",  CLASS_CAVALIER,   3000, 0x04, {ITYPE_SWORD, ITYPE_LANCE}, {21, 5, 5, 5, 3, 5, 1, 7}},
+        {"Cavalier",  	CLASS_CAVALIER,   	3000, 0x04, {ITYPE_SWORD, ITYPE_LANCE}, {21, 5, 5, 5, 3, 5, 1, 7}},
+        {"Mercenary", 	CLASS_MERCENARY,  	3000, 0x0A, {ITYPE_SWORD, -1}, {20, 4, 6, 6, 3, 3, 1, 5}},
+        {"Myrmidon",   CLASS_MYRMIDON,		2500, 0x0E, {ITYPE_SWORD, -1}, {19, 3, 6, 7, 3, 2, 2, 5}},
+        {"Thief",   CLASS_THIEF,   			3500, 0x08, {ITYPE_SWORD, -1}, {18, 2, 7, 8, 3, 1, 1, 6}},
     },
     // ITYPE_LANCE
     {
-        {"Knight",      CLASS_ARMOR_KNIGHT,   2500, 0x06, {ITYPE_LANCE, -1}, {22, 7, 2, 1, 3, 8, 1, 4}},
-        {"Wyvern Rider",CLASS_WYVERN_RIDER,   3500, 0x19, {ITYPE_LANCE, -1}, {21, 6, 4, 5, 3, 6, 0, 0}},
-        //{"Pegasus Kn.", CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE, -1}, {19, 3, 7, 7, 3, 1, 3, 7}},
+        {"Cavalier",  	CLASS_CAVALIER,   		3000, 0x04, {ITYPE_SWORD, ITYPE_LANCE}, {21, 5, 5, 5, 3, 5, 1, 7}},
+        {"Knight",      CLASS_ARMOR_KNIGHT,		2500, 0x06, {ITYPE_LANCE, -1}, 			{22, 7, 2, 1, 3, 8, 1, 4}},
+        {"Pegasus Kn.", CLASS_PEGASUS_KNIGHT,	3000, 0x39, {ITYPE_LANCE, -1}, 			{19, 3, 7, 7, 3, 1, 3, 7}},
+		{"Soldier", 	CLASS_SOLDIER,        	2500, 0x3F, {ITYPE_LANCE,  -1},			{18, 4, 7, 7, 3, 3, 0, 5}},
+        {"Wyvern Rider",CLASS_WYVERN_RIDER,   	3500, 0x19, {ITYPE_LANCE, -1}, 			{21, 6, 4, 5, 3, 6, 0, 0}},
     },
     // ITYPE_AXE
     {
-        {"Fighter", CLASS_FIGHTER, 2500, 0x31, {ITYPE_AXE, -1}, {22, 7, 5, 4, 3, 1, 0, 5}},
         {"Brigand", CLASS_BRIGAND, 2500, 0x33, {ITYPE_AXE, -1}, {22, 6, 4, 6, 3, 2, 0, 5}},
+        {"Fighter", CLASS_FIGHTER, 2500, 0x31, {ITYPE_AXE, -1}, {22, 7, 5, 4, 3, 1, 0, 5}},
         {"Pirate",  CLASS_PIRATE,  2500, 0x34, {ITYPE_AXE, -1}, {22, 5, 7, 6, 3, 2, 0, 5}},
     },
     // ITYPE_BOW
     {
         {"Archer", CLASS_ARCHER, 2500, 0x14, {ITYPE_BOW, -1}, {22, 7, 5, 4, 3, 1, 0, 5}},
     },
-    // ITYPE_LIGHT
+    // ITYPE_STAFF
     {
-        {"Monk", CLASS_MONK, 2500, 0x36, {ITYPE_LIGHT, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
+        {"Cleric", CLASS_CLERIC, 2500, 0x3B, {ITYPE_STAFF, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
+        {"Priest", CLASS_PRIEST, 2500, 0x37, {ITYPE_STAFF, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
+        {"Troubadour", CLASS_TROUBADOUR, 3500, 0x3C, {ITYPE_STAFF, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
     },
     // ITYPE_ANIMA
     {
         {"Mage", CLASS_MAGE, 2500, 0x1E, {ITYPE_ANIMA, -1}, {18, 5, 4, 5, 0, 1, 3, 5}},
+    },
+    // ITYPE_LIGHT
+    {
+        {"Monk", CLASS_MONK, 2500, 0x36, {ITYPE_LIGHT, -1}, {19, 3, 5, 6, 3, 1, 4, 5}},
     },
     // ITYPE_DARK
     {
@@ -65,10 +74,11 @@ static barrackUnitDef barrackUnits[7][20] = {
 };
 
 static int barrackUnitCounts[8] = {
-    3, // ITYPE_SWORD has 3 units
-    2, // ITYPE_LANCE has 4 units
+    4, // ITYPE_SWORD has 3 units
+    5, // ITYPE_LANCE has 3 units
     3, // ITYPE_AXE has 3 units
     1, // ITYPE_BOW has 3 units
+    3, // ITYPE_STAFF has 3 units
     1, // ITYPE_LIGHT has 1 unit
     1, // ITYPE_ANIMA has 1 unit
     1, // ITYPE_DARK has 1 unit
@@ -191,14 +201,34 @@ void Barracks_AddUnitToParty(void) {
 				case ITYPE_AXE:
 					gUnitDef1.items[i] = ITEM_AXE_IRON;
 					break;
+					
+				case ITYPE_BOW:
+					gUnitDef1.items[i] = ITEM_BOW_IRON;
+					break;
+					
+				case ITYPE_STAFF:
+					gUnitDef1.items[i] = ITEM_STAFF_HEAL;
+					break;
+				
+				case ITYPE_ANIMA:
+					gUnitDef1.items[i] = ITEM_ANIMA_FIRE;
+					break;
+					
+				case ITYPE_LIGHT:
+					gUnitDef1.items[i] = ITEM_LIGHT_LIGHTNING;
+					break;
+					
+				case ITYPE_DARK:
+					gUnitDef1.items[i] = ITEM_DARK_FLUX;
+					break;
 			}
 		}
 		else
 		{
+			gUnitDef1.items[i] = ITEM_VULNERARY;
 			i = 2;
 		}
 	}
-	gUnitDef1.items[i] = ITEM_VULNERARY;
 
     // 3.3. Ai (is null)
     for (i = 0; i < 4; ++i)
@@ -366,6 +396,8 @@ void BarracksHandleShopBuyAction(struct ProcShop * proc) {
 	}
 }
 
+
+
 void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
     u8 head_loc;
     u32 cursor_at_head;
@@ -417,15 +449,106 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 
     if (gKeyStatusPtr->newKeys & R_BUTTON)
     {
+		//UnitSlide_SetNewUnit(struct StatScreenEffectProc* proc)
+		
+		//EndAllMus();
+
+		struct Unit *unit;
+		
+		// Just get first valid unit, doesn't really matter.
+		for (int i=FACTION_BLUE + 1; i<FACTION_GREEN; i++)
+		{
+			unit = GetUnit(i);
+
+			if (UNIT_IS_VALID(unit))
+			{
+				break;
+			}
+		}
+		
+		//ss_proc = Proc_Find(ProcScr_UnitListScreen_PrepMenu);
+		
+		//struct UnitListScreenProc * list_proc;
+        //list_proc = Proc_StartBlocking(ProcScr_UnitListScreen_PrepMenu, proc);
+		
+		//EndAllMus();
+		//EndPlayerPhaseSideWindows();
+		//SetStatScreenConfig(
+		//	STATSCREEN_CONFIG_NONDEAD | STATSCREEN_CONFIG_NONBENCHED | STATSCREEN_CONFIG_NONUNK9 |
+		//	STATSCREEN_CONFIG_NONROOFED | STATSCREEN_CONFIG_NONUNK16);
+			
+		//StartStatScreen(unit, proc);
+		//gUnused_0203E884[2] = 69;
+		//Proc_End(proc);
+        //Proc_Goto(proc, 1);
+		
+		//Proc_StartBlocking(gProcScr_ShopFadeIn, proc);
+
+		
+		//Proc_Goto(list_proc, 3);
+		/* Loading but black screen (that doesn't crash) after.
+		EndAllMus();
+		EndPlayerPhaseSideWindows();
+		SetStatScreenConfig(
+			STATSCREEN_CONFIG_NONDEAD | STATSCREEN_CONFIG_NONBENCHED | STATSCREEN_CONFIG_NONUNK9 |
+			STATSCREEN_CONFIG_NONROOFED | STATSCREEN_CONFIG_NONUNK16);
+			
+		StartStatScreen(unit, proc);
+		
+		
+		
+		
+		
+        //Proc_Goto(proc, 5);
+		
+		//gStatScreen.unit = GetUnit(0);
+
+		//StatScreen_Display(Proc_Find(gProcScr_StatScreen));
+		//Proc_Break(ss_proc);
+		//Proc_Goto(ss_proc, 1);*/
+		
+		
         proc->helpTextActive = 1;
         a = (proc->head_loc * 16);
         b = ((proc->hand_loc * 16) - 72);
         StartItemHelpBox(56, a - b, proc->shopItems[proc->head_loc]);
 		proc->head_loc = 0;
+		
         return;
     }
+	
+	if(gUnused_0203E884[2] == 69)
+	{
+		
+		//StartPrepItemScreen(proc);
+		//struct PrepItemScreenProc* itemProc = Proc_Find(ProcScr_PrepItemScreen);
+		//Proc_Goto(itemProc, 5);
+		//Shop_Init(proc);
+		//Shop_InitBuyState(proc);
+		//Proc_Break(proc);
+		//Proc_Break(proc);
+		
+        //proc = Proc_Start(gProcScr_Shop, PROC_TREE_3);
+		/*
+		EndPlayerPhaseSideWindows();
+		StartShopFadeIn(proc);
+		Shop_Init(proc);
+		FadeInBlackSpeed20(proc);*/
+		
+        //proc = Proc_Start(gProcScr_Shop, PROC_TREE_3);
+		gUnused_0203E884[2] = 0;
+		
+		//Proc_Break(Proc_Find(gProcScr_StatScreen));
+		//StartShopFadeOut(proc);
+        //Proc_Goto(proc, 1);
+		//StartShopFadeIn(
+	}
+	
+	//gUnused_0203E884[2]++;
+	
 
     price = GetItemPurchasePrice(proc->unit, proc->shopItems[proc->head_loc]);
+	
 
     if (gKeyStatusPtr->newKeys & A_BUTTON)
     {
@@ -467,6 +590,10 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 		if (gKeyStatusPtr->repeatedKeys & DPAD_RIGHT)
 		{
 			gUnused_0203E884[1]++;
+			if(gUnused_0203E884[1] > 7)
+			{
+				gUnused_0203E884[1] = 0;
+			}
             PlaySoundEffect(SONG_SE_SYS_WINDOW_SELECT1);
 			refreshTab = true;
 		}
@@ -474,6 +601,10 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 		if(gKeyStatusPtr->repeatedKeys & DPAD_LEFT)
 		{
 			gUnused_0203E884[1]--;
+			if(gUnused_0203E884[1] < 0)
+			{
+				gUnused_0203E884[1] = 7;
+			}
             PlaySoundEffect(SONG_SE_SYS_WINDOW_SELECT1);
 			refreshTab = true;
 		}
@@ -486,6 +617,7 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 		
 			// Reset the shop back to top and set number of available lines.
 			ShopSt_SetHeadLocBak(0);
+			gUnused_0203E884[0] = 0; // Reset custom indexer for unit selected.
 			gShopState->head_loc = 0;
 			gShopState->item_cnt = Barracks_CountUnitsByWeapon(tab);
 			gShopState->lines = Barracks_CountUnitsByWeapon(tab);
@@ -1431,6 +1563,7 @@ void sub_80917D8(struct UnitListScreenProc * proc) {
 
     if ((gKeyStatusPtr->newKeys & R_BUTTON) != 0 && proc->helpActive == 0)
     {
+		//StartUnitSlide(GetUnit(0), 1, ss_proc);
         proc->helpActive = 1;
 
         //StartHelpBox(
@@ -1555,6 +1688,11 @@ int ShopTryMoveHand(int pos, int pre, bool hscroll_en)
         {
             pos--;
 			gUnused_0203E884[0]--;
+			
+			if(gUnused_0203E884[0] < 0)
+			{
+				gUnused_0203E884[0] = 0;
+			}
         }
     }
     else if (gKeyStatusPtr->repeatedKeys & DPAD_DOWN)
@@ -1567,6 +1705,10 @@ int ShopTryMoveHand(int pos, int pre, bool hscroll_en)
         else
             pos++;
 			gUnused_0203E884[0]++;
+			if(gUnused_0203E884[0] >= gShopState->lines)
+			{
+				gUnused_0203E884[0] = gShopState->lines;
+			}
     }
 
     if (previous != pos)

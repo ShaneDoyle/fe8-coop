@@ -39177,5 +39177,10 @@ fun 0x080b50c8 + 1, ShopDrawDefaultSellItemLine
 fun 0x080b5164 + 1, DrawShopItemPriceLine
 fun 0x080b4a54 + 1, Shop_Loop_UnkKeyHandler
 fun 0x080b5528 + 1, ShopSt_SetHeadLocBak
+fun 0x080790a4 + 1, EndAllMus
+dat 0x08587920, ProcScr_UnitListScreen_PrepMenu
+dat 0x0859adc8, sProcScr_BMXFADE
+fun 0x080b52cc + 1, InitShopScreenConfig
+fun 0x080b4bec + 1, Shop_Init
 
 dat 0x0200d6e0, gSortedUnits
