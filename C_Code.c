@@ -27,7 +27,7 @@ typedef struct {
 	int startStats[8];
 } barrackUnitDef;
 
-static barrackUnitDef barrackUnits[6][4] = {
+static barrackUnitDef barrackUnits[7][20] = {
     // ITYPE_SWORD
     {
         {"Mymidom",   CLASS_MYRMIDON,   2500, 0x0E, {ITYPE_SWORD, -1}, {19, 3, 6, 7, 3, 2, 2, 5}},
@@ -38,14 +38,17 @@ static barrackUnitDef barrackUnits[6][4] = {
     {
         {"Knight",      CLASS_ARMOR_KNIGHT,   2500, 0x06, {ITYPE_LANCE, -1}, {22, 7, 2, 1, 3, 8, 1, 4}},
         {"Wyvern Rider",CLASS_WYVERN_RIDER,   3500, 0x19, {ITYPE_LANCE, -1}, {21, 6, 4, 5, 3, 6, 0, 0}},
-        {"Pegasus Kn.", CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE, -1}, {19, 3, 7, 7, 3, 1, 3, 7}},
-        {"Soldier",     CLASS_SOLDIER,        2500, 0x3F, {ITYPE_LANCE, -1}, {18, 4, 7, 7, 3, 3, 0, 5}},
+        //{"Pegasus Kn.", CLASS_PEGASUS_KNIGHT, 3000, 0x39, {ITYPE_LANCE, -1}, {19, 3, 7, 7, 3, 1, 3, 7}},
     },
     // ITYPE_AXE
     {
         {"Fighter", CLASS_FIGHTER, 2500, 0x31, {ITYPE_AXE, -1}, {22, 7, 5, 4, 3, 1, 0, 5}},
         {"Brigand", CLASS_BRIGAND, 2500, 0x33, {ITYPE_AXE, -1}, {22, 6, 4, 6, 3, 2, 0, 5}},
         {"Pirate",  CLASS_PIRATE,  2500, 0x34, {ITYPE_AXE, -1}, {22, 5, 7, 6, 3, 2, 0, 5}},
+    },
+    // ITYPE_BOW
+    {
+        {"Archer", CLASS_ARCHER, 2500, 0x14, {ITYPE_BOW, -1}, {22, 7, 5, 4, 3, 1, 0, 5}},
     },
     // ITYPE_LIGHT
     {
@@ -60,6 +63,26 @@ static barrackUnitDef barrackUnits[6][4] = {
         {"Shaman", CLASS_SHAMAN, 3000, 0x26, {ITYPE_DARK, -1}, {20, 6, 3, 3, 0, 3, 3, 5}},
     },
 };
+
+static int barrackUnitCounts[8] = {
+    3, // ITYPE_SWORD has 3 units
+    2, // ITYPE_LANCE has 4 units
+    3, // ITYPE_AXE has 3 units
+    1, // ITYPE_BOW has 3 units
+    1, // ITYPE_LIGHT has 1 unit
+    1, // ITYPE_ANIMA has 1 unit
+    1, // ITYPE_DARK has 1 unit
+};
+
+int Barracks_CountUnitsByWeapon(int weaponType) {
+	return barrackUnitCounts[weaponType];
+	/*
+    while (barrackUnits[weaponType][count].classId != -1) {
+        count++;
+    }
+    return count;
+	*/
+}
 
 
 extern int unused_0203e760; // P2 flag.
@@ -250,11 +273,8 @@ void Barracks_PutUnitSprite(int layer, int x, int y, struct Unit * unit, int ind
 
 void Barracks_DisplayUnits(void) {
 	int index = Barracks_GetLineOffset(); // Index of Unit list.
-	if(gUnused_0203E884[1] != 0) //TODO: Remove this debug.
-	{
-		return;
-	}
-    for (int i=0; i<2; i++)
+	u8 tab = gUnused_0203E884[1];
+    for (int i=0; i<Barracks_CountUnitsByWeapon(tab); i++)
     {
         ApplyUnitSpritePalettes();
         EnablePaletteSync();
@@ -273,7 +293,7 @@ void Barracks_DrawItemMenuLine(struct Text* text, int item, s8 isUsable, u16* ma
 	// TODO: MAKE GLOBAL
 	int tab = gUnused_0203E884[1];
     Text_SetParams(text, 0, (isUsable ? TEXT_COLOR_SYSTEM_WHITE : TEXT_COLOR_SYSTEM_GRAY));
-    Text_DrawString(text, barrackUnits[tab][item-1].name);
+    Text_DrawString(text, barrackUnits[tab][item-1].name); // TODO: this is causing a crash?
 	
 	//if(unused_0203e760 >= 4)
 	{
@@ -325,6 +345,25 @@ void DisplayShopUiArrows(void) {
             120, 152,
             OBJ_PALETTE(OBJPAL_SHOP_SPINARROW) + OBJ_CHAR(OBJCHR_SHOP_SPINARROW),
             false);
+}
+
+void BarracksHandleShopBuyAction(struct ProcShop * proc) {
+    PlaySeDelayed(0xB9, 8);
+
+    gActionData.unitActionType = UNIT_ACTION_SHOPPED;
+
+    SetPartyGoldAmount(
+        GetPartyGoldAmount() - GetItemPurchasePrice(proc->unit, proc->shopItems[proc->head_loc]));
+
+    UpdateShopItemCounts(proc);
+    DrawShopSoldItems(proc);
+
+    DisplayGoldBoxText(TILEMAP_LOCATED(gBG0TilemapBuffer, 27, 6));
+	
+	if (isBarracks)
+	{
+		Barracks_AddUnitToParty();
+	}
 }
 
 void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
@@ -422,38 +461,74 @@ void Shop_Loop_BuyKeyHandler(struct ProcShop * proc) {
 	if(isBarracks)
 	{
 		bool refreshTab = false;
+		u8 tab = gUnused_0203E884[1];
 		
 		// Do weapon tab swapping.
 		if (gKeyStatusPtr->repeatedKeys & DPAD_RIGHT)
 		{
 			gUnused_0203E884[1]++;
             PlaySoundEffect(SONG_SE_SYS_WINDOW_SELECT1);
-			    for (int i = 0; i < SHOP_TEXT_LINES; i++)
-				{
-					PutBlankText(
-						&gShopItemTexts[DivRem(i, SHOP_TEXT_LINES + 1)],
-						gBG2TilemapBuffer + TILEMAP_INDEX(7, ((i * 2) & 0x1F)));
-
-					//BG_SetPosition(2, 0, -0x48);
-					BG_EnableSyncByMask(BG2_SYNC_BIT);
-				}
+			refreshTab = true;
 		}
 			
 		if(gKeyStatusPtr->repeatedKeys & DPAD_LEFT)
 		{
 			gUnused_0203E884[1]--;
             PlaySoundEffect(SONG_SE_SYS_WINDOW_SELECT1);
+			refreshTab = true;
+		}
+		
+		if(refreshTab)
+		{
 			
-			for (int i = 0; i<SHOP_TEXT_LINES; i++)
+			u8 tab = gUnused_0203E884[1];
+			BG_Fill(gBG2TilemapBuffer, 0);
+		
+			// Reset the shop back to top and set number of available lines.
+			ShopSt_SetHeadLocBak(0);
+			gShopState->head_loc = 0;
+			gShopState->item_cnt = Barracks_CountUnitsByWeapon(tab);
+			gShopState->lines = Barracks_CountUnitsByWeapon(tab);
+			gShopState->hand_loc = 0;
+			gShopState->px_per_line = 16;
+			gShopState->trig = 4;
+			//gShopState->draw_line = func;
+			//gShopState->proc = proc;
+			//gShopState->bg2_base = -bg2_base;
+			gShopState->bg2_off = gShopState->hand_loc * 16;
+			//Shop_InitBuyState(proc);
+			//BarracksHandleShopBuyAction(proc);
+			//proc->shopItems[2] = MakeNewItem(0);//MakeNewItem(*shopItems++);
+			//UpdateShopItemCounts(proc);
+					
+					
+			// Refreshes the text of units.
+			DrawShopSoldItems(proc);
+			
+			
+			
+			/*
+			for (int i = 0; i < Barracks_CountUnitsByWeapon(tab); i++)
+			{
+				PutBlankText(
+					&gShopItemTexts[DivRem(i, 2 + 1)],
+					gBG2TilemapBuffer + TILEMAP_INDEX(7, ((i * 2) & 0x1F)));
+
+				//BG_SetPosition(2, 0, -0x48);
+				BG_EnableSyncByMask(BG2_SYNC_BIT);
+			}
+				
+			
+			for (int i = 0; i<Barracks_CountUnitsByWeapon(tab); i++)
 			{
 				ShopDrawBuyItemLine(proc, i);
 			}
+			*/
 		}
-		
-		
 	}
 	
-	for (int i=0; i<7; i++)
+	// TODO: Is this shitty? This draws the icons at the top for the tabs.
+	for (int i=0; i<8; i++)
 	{
 		if(gUnused_0203E884[1] == i)
 		{
@@ -508,24 +583,6 @@ void Shop_TryAddItemToInventory(struct ProcShop * proc) {
     Proc_Goto(proc, PL_SHOP_BUY_DONE);
 }
 
-void BarracksHandleShopBuyAction(struct ProcShop * proc) {
-    PlaySeDelayed(0xB9, 8);
-
-    gActionData.unitActionType = UNIT_ACTION_SHOPPED;
-
-    SetPartyGoldAmount(
-        GetPartyGoldAmount() - GetItemPurchasePrice(proc->unit, proc->shopItems[proc->head_loc]));
-
-    UpdateShopItemCounts(proc);
-    DrawShopSoldItems(proc);
-
-    DisplayGoldBoxText(TILEMAP_LOCATED(gBG0TilemapBuffer, 27, 6));
-	
-	if (isBarracks)
-	{
-		Barracks_AddUnitToParty();
-	}
-}
 
 int Barracks_MakeNewItem(int item) {
 	return 11777;
@@ -659,6 +716,7 @@ void StartShopScreen(struct Unit * unit, const u16 * inventory, u8 shopType, Pro
 			gUnused_0203E884[i] = 0;
 		}
 	}
+			//gUnused_0203E884[] = 1;
 
     if (parent)
         proc = Proc_StartBlocking(gProcScr_Shop, parent);
@@ -672,10 +730,12 @@ void StartShopScreen(struct Unit * unit, const u16 * inventory, u8 shopType, Pro
     if (inventory != 0)
         shopItems = inventory;
 	
+	
 	// Hardcode items 1->20 as entries. This will allow us to track each unit.
+	u8 tab = gUnused_0203E884[1];
 	if(isBarracks)
 	{
-		for (i = 0; i < 2; i++)
+		for (i = 0; i < Barracks_CountUnitsByWeapon(tab); i++)
 		{
 			//if (i < 14 + 999)
 			{
@@ -765,71 +825,6 @@ void DrawItemMenuLine(struct Text* text, int item, s8 isUsable, u16* mapOut) {
 				//Barracks_DrawUnitWeaponIcon(gBG0TilemapBuffer + TILEMAP_INDEX(7 + (i*2), 6), i, OAM2_PAL(5));
 			}
 		}
-		
-			//Barracks_DrawUnitWeaponIcon(gBG0TilemapBuffer + TILEMAP_INDEX(8, 7), 0, OAM2_PAL(5));
-			//Barracks_DrawUnitWeaponIcon(gBG0TilemapBuffer + TILEMAP_INDEX(8, 7), 0, OAM2_PAL(5));
-		
-		
-		
-		
-		//TODO: This is fucking shit, this should only be drawn once per line! THis is drawn 5 times technically.
-
-    
-		//Barracks_DrawUnitWeaponIcon(mapOut + 9 + 2 * 0, 1, OAM2_PAL(5)); 
-        //DrawIcon(tm + i * 0x40, GetItemIconId(item), 0x4000);
-		
-		/*
-		if(item == 1)
-		{
-			Barracks_DrawUnitWeaponIcon(mapOut + 9 + 2 * 0, i, OAM2_PAL(5)); // Icons
-			//DrawIcon(mapOut + 9 + 2 * 0, i + 112, OAM2_PAL(5)); // Icons
-			i =1;
-			DrawIcon(mapOut + 9 + 2 * 1, i + 112, OAM2_PAL(5)); // Icons
-			//DrawIcon(mapOut + 9 + 2 * i, i + 112, OAM2_PAL(5)); // Icons
-		}
-		
-		if(item == 2)
-		{
-			i = 1;
-			DrawIcon(mapOut + 9 + 2 * 0, i + 112, OAM2_PAL(5)); // Icons
-		}
-		
-		if(item == 3)
-		{
-			DrawIcon(mapOut + 9 + 2 * 0, i + 112, OAM2_PAL(5)); // Icons
-		}
-		
-		if(item == 4)
-		{
-			DrawIcon(mapOut + 9 + 2 * 0, i + 112, OAM2_PAL(5)); // Icons
-		}
-		
-		if(item == 5)
-		{
-			i = 3;
-			DrawIcon(mapOut + 9 + 2 * 0, i + 112, OAM2_PAL(5)); // Icons
-		}
-		
-		if(item == 6)
-		{
-			i = 1;
-			DrawIcon(mapOut + 9 + 2 * 0, i + 112, OAM2_PAL(5)); // Icons
-		}
-		
-		
-		if(item == 7)
-		{
-			i = 5;
-			DrawIcon(mapOut + 9 + 2 * 0, i + 112, OAM2_PAL(5)); // Icons
-		}
-		
-		
-		if(item == 8)
-		{
-			i = 7;
-			DrawIcon(mapOut + 9 + 2 * 0, i + 112, OAM2_PAL(5)); // Icons
-		}
-		*/
 
 		return;
 	}
@@ -842,6 +837,85 @@ void DrawItemMenuLine(struct Text* text, int item, s8 isUsable, u16* mapOut) {
     PutNumberOrBlank(mapOut + 11, isUsable ? TEXT_COLOR_SYSTEM_BLUE : TEXT_COLOR_SYSTEM_GRAY, GetItemUses(item));
 
     DrawIcon(mapOut, GetItemIconId(item), 0x4000);
+}
+
+void DrawShopSoldItems(struct ProcShop * proc)
+{
+    int item;
+    int index;
+    int i;
+
+    SetTextFont(0);
+    InitSystemTextFont();
+	if(isBarracks)
+	{
+		
+		// Refresh the items drawn on screen as different weapon tabs may have different number of units to buy.
+		u8 tab = gUnused_0203E884[1];
+		for (int i = 0; i < Barracks_CountUnitsByWeapon(tab); i++)
+		{
+			//if (i < 14 + 999)
+			{
+				proc->shopItems[i] = 1+i; //i+1;//MakeNewItem(*shopItems++);
+			}
+			//else
+			{
+				//proc->shopItems[i] = MakeNewItem(*shopItems++);
+			}
+		}
+		
+	
+		//for (i = proc->hand_idx; i < proc->hand_idx + SHOP_TEXT_LINES; i++)
+		for (i = 0; i < 20; i++)
+		{
+			index = DivRem(i, Barracks_CountUnitsByWeapon(tab) + 1);
+			ClearText(&gShopItemTexts[index]);
+		}
+
+		for (i = 0; i < Barracks_CountUnitsByWeapon(tab); i++)
+		{
+			index = DivRem(i, Barracks_CountUnitsByWeapon(tab) + 1);
+			item = proc->shopItems[i];
+
+			if (item == 0)
+				break;
+
+			DrawShopItemPriceLine(
+				&gShopItemTexts[index],
+				item,
+				proc->unit,
+				gBG2TilemapBuffer + TILEMAP_INDEX(7, ((i * 2) & 0x1F))
+			);
+		}
+	}
+	else
+	{
+		for (i = proc->hand_idx; i < proc->hand_idx + SHOP_TEXT_LINES; i++)
+		{
+			index = DivRem(i, SHOP_TEXT_LINES + 1);
+			ClearText(&gShopItemTexts[index]);
+		}
+
+		for (i = proc->hand_idx; i < proc->hand_idx + SHOP_TEXT_LINES; i++)
+		{
+			index = DivRem(i, SHOP_TEXT_LINES + 1);
+			item = proc->shopItems[i];
+
+			if (item == 0)
+				break;
+
+			DrawShopItemPriceLine(
+				&gShopItemTexts[index],
+				item,
+				proc->unit,
+				gBG2TilemapBuffer + TILEMAP_INDEX(7, ((i * 2) & 0x1F))
+			);
+		}
+	}
+
+    
+    BG_SetPosition(BG_2, 0, (proc->hand_idx * 0x10) - 0x48);
+    BG_EnableSyncByMask(BG2_SYNC_BIT);
 }
 
 

@@ -39176,5 +39176,6 @@ fun 0x080b987c + 1, WorldMap_CallGuide
 fun 0x080b50c8 + 1, ShopDrawDefaultSellItemLine
 fun 0x080b5164 + 1, DrawShopItemPriceLine
 fun 0x080b4a54 + 1, Shop_Loop_UnkKeyHandler
+fun 0x080b5528 + 1, ShopSt_SetHeadLocBak
 
 dat 0x0200d6e0, gSortedUnits
