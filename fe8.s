@@ -39182,5 +39182,9 @@ dat 0x08587920, ProcScr_UnitListScreen_PrepMenu
 dat 0x0859adc8, sProcScr_BMXFADE
 fun 0x080b52cc + 1, InitShopScreenConfig
 fun 0x080b4bec + 1, Shop_Init
+fun 0x08006618 + 1, SetFacePosition
+fun 0x080784f4 + 1, StartUiMu
+fun 0x080b49f8 + 1, Shop_ExitShopDialogue
+fun 0x0804e0a8 + 1, UnpackUiFramePalette
 
 dat 0x0200d6e0, gSortedUnits
